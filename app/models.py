@@ -3,7 +3,7 @@ from .database import *
 CAPACITES_VALIDES = {15, 32, 60}
 
 
-def generer_places(bus_id: int, capacite: int) -> dict:
+def generer_places(id_bus: int, capacite: int) -> dict:
     """
     Génère les places numérotées de 1 à `capacite` pour le bus donné.
 
@@ -19,30 +19,30 @@ def generer_places(bus_id: int, capacite: int) -> dict:
     db = init_db()
     cur = db.cursor()
 
-    cur.execute("SELECT COUNT(*) FROM place WHERE bus_id = ?", (bus_id,))
+    cur.execute("SELECT COUNT(*) FROM places WHERE id_bus = ?", (id_bus,))
     (existantes,) = cur.fetchone()
     if existantes > 0:
         raise RuntimeError(
-            f"Les places du bus {bus_id} ont déjà été générées ({existantes} places en base)."
+            f"Les places du bus {id_bus} ont déjà été générées ({existantes} places en base)."
         )
 
-    places = [(bus_id, num_place) for num_place in range(1, capacite + 1)]
+    places = [(id_bus, num_place) for num_place in range(1, capacite + 1)]
     cur.executemany(
-        "INSERT INTO place (bus_id, numero_place) VALUES (?, ?)",
+        "INSERT INTO places (id_bus, numero_place) VALUES (?, ?)",
         places,
     )
     db.commit()
     cur.close()
 
     return {
-        "bus_id": bus_id,
+        "id_bus": id_bus,
         "capacite": capacite,
         "places_generees": capacite,
-        "message": f"{capacite} places générées avec succès pour le bus {bus_id}.",
+        "message": f"{capacite} places générées avec succès pour le bus {id_bus}.",
     }
 
 
-def get_places_par_bus(bus_id: int) -> list[dict]:
+def get_places_par_bus(id_bus: int) -> list[dict]:
     """
     Retourne toutes les places d'un bus avec leur statut.
     Appelé par l'équipe affichage.
@@ -51,12 +51,12 @@ def get_places_par_bus(bus_id: int) -> list[dict]:
     cur = db.cursor()
     cur.execute(
         """
-        SELECT p.id_place, p.numero_place, p.bus_id
-        FROM place p
-        WHERE p.bus_id = ?
+        SELECT p.id_place, p.numero_place, p.id_bus
+        FROM places p
+        WHERE p.id_bus = ?
         ORDER BY p.numero_place ASC
         """,
-        (bus_id,),
+        (id_bus,),
     )
     rows = cur.fetchall()
     cur.close()
@@ -65,25 +65,25 @@ def get_places_par_bus(bus_id: int) -> list[dict]:
         {
             "id_place": row[0],
             "numero_place": row[1],
-            "bus_id": row[2],
+            "id_bus": row[2],
         }
         for row in rows
     ]
 
 
-def supprimer_places(bus_id: int) -> dict:
+def supprimer_places(id_bus: int) -> dict:
     """
     Supprime toutes les places d'un bus (utile en cas de reconfiguration).
     """
     db = init_db()
     cur = db.cursor()
-    cur.execute("DELETE FROM place WHERE bus_id = ?", (bus_id,))
+    cur.execute("DELETE FROM places WHERE id_bus = ?", (id_bus,))
     supprimees = cur.rowcount
     db.commit()
     cur.close()
 
     return {
-        "bus_id": bus_id,
+        "id_bus": id_bus,
         "places_supprimees": supprimees,
-        "message": f"{supprimees} place(s) supprimée(s) pour le bus {bus_id}.",
+        "message": f"{supprimees} place(s) supprimée(s) pour le bus {id_bus}.",
     }
