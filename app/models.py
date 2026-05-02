@@ -1,6 +1,6 @@
 from .database import *
 
-CAPACITES_VALIDES = {15, 32, 60}
+CAPACITES_VALIDES = {12, 32, 60}
 
 
 def generer_places(id_bus: int, capacite: int) -> dict:
