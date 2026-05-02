@@ -10,8 +10,8 @@ Responsabilité : **génération des places** numérotées en base de données p
 | Action | Endpoint | Appelé par |
 |---|---|---|
 | Générer les places d'un bus | `POST /places/generer` | Équipe gestion des bus |
-| Lire les places d'un bus | `GET /places/<bus_id>` | Équipe affichage |
-| Supprimer les places d'un bus | `DELETE /places/<bus_id>` | Interne / reconfiguration |
+| Lire les places d'un bus | `GET /places/<id_bus>` | Équipe affichage |
+| Supprimer les places d'un bus | `DELETE /places/<id_bus>` | Interne / reconfiguration |
 
 ---
 
@@ -48,20 +48,20 @@ L'API tourne sur `http://localhost:5000`.
 
 ### `POST /places/generer`
 
-Génère les places pour un bus. Les capacités acceptées sont **15, 32 ou 60**.
+Génère les places pour un bus. Les capacités acceptées sont **12, 32 ou 60**.
 
 **Corps JSON :**
 ```json
-{ "bus_id": 3, "capacite": 15 }
+{ "id_bus": 3, "capacite": 12 }
 ```
 
 **Réponse 201 :**
 ```json
 {
-  "bus_id": 3,
-  "capacite": 15,
-  "places_generees": 15,
-  "message": "15 places générées avec succès pour le bus 3."
+  "id_bus": 3,
+  "capacite": 12,
+  "places_generees": 12,
+  "message": "12 places générées avec succès pour le bus 3."
 }
 ```
 
@@ -72,31 +72,31 @@ Génère les places pour un bus. Les capacités acceptées sont **15, 32 ou 60**
 
 ---
 
-### `GET /places/<bus_id>`
+### `GET /places/<id_bus>`
 
 Retourne la liste des places d'un bus.
 
 **Réponse 200 :**
 ```json
 {
-  "bus_id": 3,
-  "total": 15,
+  "id_bus": 3,
+  "total": 12,
   "places": [
-    { "id_place": 1, "numero_place": 1, "bus_id": 3 },
-    { "id_place": 2, "numero_place": 2, "bus_id": 3 }
+    { "id_place": 1, "numero_place": 1, "id_bus": 3 },
+    { "id_place": 2, "numero_place": 2, "id_bus": 3 }
   ]
 }
 ```
 
 ---
 
-### `DELETE /places/<bus_id>`
+### `DELETE /places/<id_bus>`
 
 Supprime toutes les places d'un bus (à utiliser avant de régénérer avec une autre capacité).
 
 **Réponse 200 :**
 ```json
-{ "bus_id": 3, "places_supprimees": 15, "message": "15 place(s) supprimée(s) pour le bus 3." }
+{ "id_bus": 3, "places_supprimees": 12, "message": "12 place(s) supprimée(s) pour le bus 3." }
 ```
 
 ---
@@ -115,7 +115,7 @@ pytest tests/ -v
 gestion_places/
 ├── app/
 │   ├── __init__.py     # factory Flask
-│   ├── database.py     # connexion MariaDB
+│   ├── database.py     # connexion MariaDB ou MYSQL
 │   ├── models.py       # logique métier
 │   └── routes.py       # endpoints Blueprint
 ├── schema.sql          # DDL table place
