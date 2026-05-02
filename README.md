@@ -27,10 +27,8 @@ python -m venv venv
 source venv/bin/activate      # Linux/Mac
 venv\Scripts\activate         # Windows
 
-# 3. Installer les dépendances
-pip install -r requirements.txt
 
-# 4. Initialiser la base de données
+# 3. Initialiser la base de données
 mysql -u root -p < schema.sql
 ```
 
@@ -120,10 +118,7 @@ gestion_places/
 │   ├── database.py     # connexion MariaDB
 │   ├── models.py       # logique métier
 │   └── routes.py       # endpoints Blueprint
-├── tests/
-│   └── test_places.py
 ├── schema.sql          # DDL table place
 ├── run.py              # point d'entrée
-├── requirements.txt
 └── .gitignore
 ```
