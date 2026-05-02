@@ -8,7 +8,7 @@ places_bp = Blueprint("places", __name__)
 def route_generer():
     """
     POST /places/generer
-    Body JSON : { "bus_id": 3, "capacite": 15 }
+    Body JSON : { "id_bus": 3, "capacite": 15 }
 
     Génère les places numérotées 1..capacite pour le bus.
     Appelé par l'équipe 'gestion des bus' après création d'un bus.
@@ -17,20 +17,20 @@ def route_generer():
     if not data:
         return jsonify({"erreur": "Corps JSON manquant."}), 400
 
-    bus_id = data.get("bus_id")
+    id_bus = data.get("id_bus")
     capacite = data.get("capacite")
 
-    if bus_id is None or capacite is None:
-        return jsonify({"erreur": "Champs requis : bus_id, capacite."}), 400
+    if id_bus is None or capacite is None:
+        return jsonify({"erreur": "Champs requis : id_bus, capacite."}), 400
 
-    if not isinstance(bus_id, int) or bus_id <= 0:
-        return jsonify({"erreur": "bus_id doit être un entier positif."}), 400
+    if not isinstance(id_bus, int) or id_bus <= 0:
+        return jsonify({"erreur": "id_bus doit être un entier positif."}), 400
 
     if not isinstance(capacite, int):
         return jsonify({"erreur": "capacite doit être un entier."}), 400
 
     try:
-        resultat = generer_places(bus_id, capacite)
+        resultat = generer_places(id_bus, capacite)
         return jsonify(resultat), 201
     except ValueError as e:
         return jsonify({"erreur": str(e)}), 422
@@ -40,32 +40,32 @@ def route_generer():
         return jsonify({"erreur": "Erreur interne.", "detail": str(e)}), 500
 
 
-@places_bp.get("/<int:bus_id>")
-def route_get_places(bus_id):
+@places_bp.get("/<int:id_bus>")
+def route_get_places(id_bus):
     """
-    GET /places/<bus_id>
+    GET /places/<id_bus>
 
     Retourne la liste des places d'un bus.
     Utilisé par l'équipe affichage.
     """
     try:
-        places = get_places_par_bus(bus_id)
+        places = get_places_par_bus(id_bus)
         if not places:
-            return jsonify({"erreur": f"Aucune place trouvée pour le bus {bus_id}."}), 404
-        return jsonify({"bus_id": bus_id, "total": len(places), "places": places}), 200
+            return jsonify({"erreur": f"Aucune place trouvée pour le bus {id_bus}."}), 404
+        return jsonify({"id_bus": id_bus, "total": len(places), "places": places}), 200
     except Exception as e:
         return jsonify({"erreur": "Erreur interne.", "detail": str(e)}), 500
 
 
-@places_bp.delete("/<int:bus_id>")
-def route_supprimer(bus_id):
+@places_bp.delete("/<int:id_bus>")
+def route_supprimer(id_bus):
     """
-    DELETE /places/<bus_id>
+    DELETE /places/<id_bus>
 
     Supprime toutes les places d'un bus (reconfiguration).
     """
     try:
-        resultat = supprimer_places(bus_id)
+        resultat = supprimer_places(id_bus)
         return jsonify(resultat), 200
     except Exception as e:
         return jsonify({"erreur": "Erreur interne.", "detail": str(e)}), 500
