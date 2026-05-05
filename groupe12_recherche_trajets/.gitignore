@@ -1,0 +1,15 @@
+# Environnement virtuel Python (trop lourd, inutile pour les autres)
+venv/
+__pycache__/
+*.pyc
+*.pyo
+
+# Variables sensibles (mot de passe BDD)
+.env
+
+# Editeurs
+.vscode/
+.idea/
+
+# Systeme Windows
+Thumbs.db

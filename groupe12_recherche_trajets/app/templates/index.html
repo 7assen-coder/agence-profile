@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recherche de Trajets</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: #f0f4f8;
+            min-height: 100vh;
+        }
+
+        header {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        header h1 { font-size: 2rem; margin-bottom: 5px; }
+        header p  { opacity: 0.85; font-size: 1rem; }
+
+        .container {
+            max-width: 900px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+
+        /* Formulaire de recherche */
+        .search-card {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            margin-bottom: 30px;
+        }
+
+        .search-card h2 {
+            color: #4a5568;
+            margin-bottom: 20px;
+            font-size: 1.1rem;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #4a5568;
+        }
+
+        select, input {
+            padding: 10px 14px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            color: #2d3748;
+            transition: border-color 0.2s;
+            background: white;
+        }
+
+        select:focus, input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn-search {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        .btn-search:hover { opacity: 0.9; }
+
+        /* Résultats */
+        .results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .results-count {
+            color: #4a5568;
+            font-weight: 600;
+        }
+
+        .badge {
+            background: #667eea;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+        }
+
+        /* Carte trajet */
+        .trajet-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px 25px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+            border-left: 4px solid #667eea;
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 10px;
+            align-items: center;
+            transition: transform 0.2s;
+        }
+
+        .trajet-card:hover { transform: translateY(-2px); }
+
+        .trajet-route {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #2d3748;
+            margin-bottom: 6px;
+        }
+
+        .trajet-details {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .detail-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.88rem;
+            color: #718096;
+        }
+
+        .trajet-prix {
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: #667eea;
+            text-align: right;
+        }
+
+        .trajet-prix span {
+            display: block;
+            font-size: 0.75rem;
+            color: #a0aec0;
+            font-weight: 400;
+        }
+
+        /* États */
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #a0aec0;
+            font-size: 1rem;
+        }
+
+        .empty {
+            text-align: center;
+            padding: 40px;
+            color: #a0aec0;
+        }
+
+        .empty div { font-size: 3rem; margin-bottom: 10px; }
+
+        .error {
+            background: #fff5f5;
+            border: 1px solid #fed7d7;
+            color: #c53030;
+            padding: 15px 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .periode-badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 0.78rem;
+            font-weight: 600;
+        }
+
+        .matin     { background: #fef3c7; color: #92400e; }
+        .apres-midi { background: #dbeafe; color: #1e40af; }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>🚌 Recherche de Trajets</h1>
+    <p>Plateforme de réservation de transport interurbain</p>
+</header>
+
+<div class="container">
+
+    <!-- Formulaire -->
+    <div class="search-card">
+        <h2>🔍 Trouver un trajet</h2>
+        <div class="form-grid">
+            <div class="form-group">
+                <label>Ville de départ</label>
+                <select id="ville_depart">
+                    <option value="">-- Toutes les villes --</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Ville d'arrivée</label>
+                <select id="ville_arrivee">
+                    <option value="">-- Toutes les villes --</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Date</label>
+                <input type="date" id="date">
+            </div>
+            <div class="form-group">
+                <label>Période</label>
+                <select id="periode">
+                    <option value="">-- Toutes --</option>
+                    <option value="matin">Matin</option>
+                    <option value="apres-midi">Après-midi</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Prix maximum (MRU)</label>
+                <input type="number" id="prix_max" placeholder="Ex: 3000">
+            </div>
+            <div class="form-group">
+                <label>Trier par</label>
+                <select id="tri">
+                    <option value="heure_depart">Heure de départ</option>
+                    <option value="prix_asc">Prix croissant</option>
+                    <option value="prix_desc">Prix décroissant</option>
+                </select>
+            </div>
+        </div>
+        <button class="btn-search" onclick="rechercherTrajets()">
+            🔍 Rechercher
+        </button>
+    </div>
+
+    <!-- Résultats -->
+    <div id="resultats"></div>
+
+</div>
+
+<script>
+    // Au chargement de la page, on remplit les menus des villes
+    window.onload = function() {
+        chargerVilles();
+    };
+
+    // Charge les villes depuis l'API et remplit les menus déroulants
+    async function chargerVilles() {
+        try {
+            const response = await fetch("http://127.0.0.1:5012/api/villes");
+            const data = await response.json();
+
+            const selectDepart  = document.getElementById("ville_depart");
+            const selectArrivee = document.getElementById("ville_arrivee");
+
+            data.villes.forEach(ville => {
+                // Ajoute chaque ville dans les deux menus
+                selectDepart.innerHTML  += `<option value="${ville.nom}">${ville.nom}</option>`;
+                selectArrivee.innerHTML += `<option value="${ville.nom}">${ville.nom}</option>`;
+            });
+        } catch (err) {
+            console.error("Erreur chargement villes:", err);
+        }
+    }
+
+    // Recherche les trajets selon les filtres
+    async function rechercherTrajets() {
+        // Récupère les valeurs des filtres
+        const ville_depart  = document.getElementById("ville_depart").value;
+        const ville_arrivee = document.getElementById("ville_arrivee").value;
+        const date          = document.getElementById("date").value;
+        const periode       = document.getElementById("periode").value;
+        const prix_max      = document.getElementById("prix_max").value;
+        const tri           = document.getElementById("tri").value;
+
+        // Construit l'URL avec les paramètres non vides
+        let url = "http://127.0.0.1:5012/api/trajets/recherche?";
+        if (ville_depart)  url += `ville_depart=${ville_depart}&`;
+        if (ville_arrivee) url += `ville_arrivee=${ville_arrivee}&`;
+        if (date)          url += `date=${date}&`;
+        if (periode)       url += `periode=${periode}&`;
+        if (prix_max)      url += `prix_max=${prix_max}&`;
+        if (tri)           url += `tri=${tri}`;
+
+        // Affiche "chargement..."
+        document.getElementById("resultats").innerHTML = `
+            <div class="loading">⏳ Recherche en cours...</div>
+        `;
+
+        try {
+            const response = await fetch(url);
+            const data     = await response.json();
+            afficherResultats(data);
+        } catch (err) {
+            document.getElementById("resultats").innerHTML = `
+                <div class="error">❌ Erreur de connexion à l'API</div>
+            `;
+        }
+    }
+
+    // Affiche les résultats dans la page
+    function afficherResultats(data) {
+        const container = document.getElementById("resultats");
+
+        if (!data.success || data.count === 0) {
+            container.innerHTML = `
+                <div class="empty">
+                    <div>🚌</div>
+                    <p>Aucun trajet trouvé</p>
+                </div>
+            `;
+            return;
+        }
+
+        // En-tête des résultats
+        let html = `
+            <div class="results-header">
+                <span class="results-count">Résultats</span>
+                <span class="badge">${data.count} trajet(s) trouvé(s)</span>
+            </div>
+        `;
+
+        // Une carte par trajet
+        data.trajets.forEach(t => {
+            const periodeBadge = t.periode === "matin"
+                ? `<span class="periode-badge matin">🌅 Matin</span>`
+                : `<span class="periode-badge apres-midi">🌆 Après-midi</span>`;
+
+            html += `
+                <div class="trajet-card">
+                    <div>
+                        <div class="trajet-route">
+                            ${t.ville_depart} → ${t.ville_arrivee}
+                        </div>
+                        <div class="trajet-details">
+                            <span class="detail-item">🏢 ${t.agence}</span>
+                            <span class="detail-item">🕐 ${t.heure_depart} → ${t.heure_arrivee}</span>
+                            <span class="detail-item">📅 ${t.date_trajet}</span>
+                            <span class="detail-item">🚌 ${t.immatriculation}</span>
+                            ${periodeBadge}
+                        </div>
+                    </div>
+                    <div class="trajet-prix">
+                        ${t.prix} MRU
+                        <span>par personne</span>
+                    </div>
+                </div>
+            `;
+        });
+
+        container.innerHTML = html;
+    }
+</script>
+
+</body>
+</html>
