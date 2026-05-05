@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+{% block title %}Clients{% endblock %}
+{% block page_title %}Gestion des clients{% endblock %}
+
+{% block content %}
+<div class="row g-3">
+<div class="col-lg-4">
+    <div class="panel">
+        <div class="panel-header"><h5><i class="fas fa-user-plus text-primary"></i> Ajouter un client</h5></div>
+        <div class="panel-body">
+            <form method="POST" action="{{ url_for('nouveau_client') }}" class="form-modern">
+                <div class="mb-2">
+                    <label>Nom *</label>
+                    <input type="text" name="nom" required>
+                </div>
+                <div class="mb-2">
+                    <label>Prénom *</label>
+                    <input type="text" name="prenom" required>
+                </div>
+                <div class="mb-2">
+                    <label>Téléphone *</label>
+                    <input type="tel" name="telephone" required>
+                </div>
+                <div class="mb-2">
+                    <label>Email</label>
+                    <input type="email" name="email">
+                </div>
+                <div class="mb-3">
+                    <label>CNI</label>
+                    <input type="text" name="cni">
+                </div>
+                <button class="btn-modern btn-primary-m" style="width:100%;justify-content:center;">
+                    <i class="fas fa-plus"></i> Ajouter
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="col-lg-8">
+    <div class="panel">
+        <div class="panel-header"><h5><i class="fas fa-users text-info"></i> Liste des clients ({{ clients|length }})</h5></div>
+        <table class="table-modern">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Client</th>
+                    <th>Téléphone</th>
+                    <th>Email</th>
+                    <th>Réservations</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for c in clients %}
+                <tr>
+                    <td><strong>#{{ c.id }}</strong></td>
+                    <td>
+                        <div style="display:flex;align-items:center;gap:10px;">
+                            <div class="avatar" style="width:34px;height:34px;font-size:0.8rem;">
+                                {{ c.prenom[0]|upper }}{{ c.nom[0]|upper }}
+                            </div>
+                            <div>
+                                <strong>{{ c.prenom }} {{ c.nom }}</strong><br>
+                                <small class="text-muted">{{ c.cni or '—' }}</small>
+                            </div>
+                        </div>
+                    </td>
+                    <td>{{ c.telephone }}</td>
+                    <td><small>{{ c.email or '—' }}</small></td>
+                    <td><span class="badge-modern badge-actif">{{ c.nb_reservations }} résa.</span></td>
+                </tr>
+                {% else %}
+                <tr><td colspan="5" class="text-center text-muted py-4">Aucun client</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+</div>
+{% endblock %}

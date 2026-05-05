@@ -1,0 +1,104 @@
+{% extends 'base.html' %}
+{% block title %}Nouvelle réservation{% endblock %}
+{% block page_title %}Nouvelle réservation{% endblock %}
+{% block page_subtitle %}Créer une réservation pour un client{% endblock %}
+
+{% block content %}
+<div class="row g-3">
+    <div class="col-lg-8">
+        <div class="panel">
+            <div class="panel-header"><h5><i class="fas fa-plus-circle text-primary"></i> Informations de réservation</h5></div>
+            <div class="panel-body">
+                <form method="POST" class="form-modern">
+                    <div class="row g-3">
+                        <div class="col-md-12">
+                            <label><i class="fas fa-user"></i> Client *</label>
+                            <select name="client_id" required>
+                                <option value="">-- Sélectionner un client --</option>
+                                {% for c in clients %}
+                                <option value="{{ c.id }}">{{ c.prenom }} {{ c.nom }} - {{ c.telephone }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="col-md-12">
+                            <label><i class="fas fa-route"></i> Trajet *</label>
+                            <select name="trajet_id" required id="selectTrajet">
+                                <option value="">-- Sélectionner un trajet --</option>
+                                {% for t in trajets %}
+                                <option value="{{ t.id }}" data-prix="{{ t.prix }}">
+                                    {{ t.ville_depart }} → {{ t.ville_arrivee }} —
+                                    {{ t.date_depart }} à {{ t.heure_depart }} — {{ t.prix|money }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label><i class="fas fa-chair"></i> Numéro de place *</label>
+                            <input type="number" name="numero_place" min="1" required placeholder="Ex: 12">
+                        </div>
+
+                        <div class="col-md-6">
+                            <label><i class="fas fa-circle-check"></i> Statut</label>
+                            <select name="statut" id="selectStatut">
+                                <option value="en_attente">En attente</option>
+                                <option value="paye">Payé immédiatement</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-12" id="modePaiementBox" style="display:none;">
+                            <label><i class="fas fa-credit-card"></i> Mode de paiement</label>
+                            <select name="mode_paiement">
+                                <option value="especes">Espèces</option>
+                                <option value="mobile_money">Mobile Money</option>
+                                <option value="carte">Carte bancaire</option>
+                                <option value="virement">Virement</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="d-flex gap-2 mt-4">
+                        <button class="btn-modern btn-primary-m">
+                            <i class="fas fa-floppy-disk"></i> Enregistrer la réservation
+                        </button>
+                        <a href="{{ url_for('reservations') }}" class="btn-modern btn-light-m">
+                            <i class="fas fa-xmark"></i> Annuler
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="panel" style="background:linear-gradient(135deg,#4f46e5,#06b6d4);color:white;border:none;">
+            <div class="panel-body">
+                <i class="fas fa-circle-info fa-2x mb-3"></i>
+                <h5 style="color:white;">Récapitulatif</h5>
+                <div style="margin-top:18px;">
+                    <p style="opacity:0.9;font-size:0.9rem;">
+                        Sélectionnez un client et un trajet pour créer une nouvelle réservation.
+                        Si vous choisissez "Payé immédiatement", la vente sera automatiquement enregistrée.
+                    </p>
+                    <hr style="border-color:rgba(255,255,255,0.3);">
+                    <div style="font-size:0.85rem;opacity:0.95;">
+                        <p><i class="fas fa-check"></i> Le numéro de place doit être unique sur ce trajet</p>
+                        <p><i class="fas fa-check"></i> Une réservation peut être encaissée plus tard</p>
+                        <p><i class="fas fa-check"></i> Vous pouvez annuler à tout moment</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.getElementById('selectStatut').addEventListener('change', function() {
+    document.getElementById('modePaiementBox').style.display =
+        this.value === 'paye' ? 'block' : 'none';
+});
+</script>
+{% endblock %}

@@ -1,0 +1,202 @@
+{% extends 'base.html' %}
+{% block title %}Ventes{% endblock %}
+{% block page_title %}Suivi des ventes{% endblock %}
+{% block page_subtitle %}Analyse complète des revenus et transactions{% endblock %}
+
+{% block content %}
+<!-- KPI -->
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="stat-card">
+            <div class="icon bg-success-grad"><i class="fas fa-sack-dollar"></i></div>
+            <div class="label">Total des revenus</div>
+            <div class="value" style="font-size:1.7rem;">{{ total_revenus|money }}</div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="stat-card">
+            <div class="icon bg-primary-grad"><i class="fas fa-receipt"></i></div>
+            <div class="label">Nombre de ventes</div>
+            <div class="value">{{ nb_ventes }}</div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="stat-card">
+            <div class="icon bg-info-grad"><i class="fas fa-calculator"></i></div>
+            <div class="label">Panier moyen</div>
+            <div class="value" style="font-size:1.5rem;">
+                {% if nb_ventes > 0 %}{{ (total_revenus / nb_ventes)|money }}{% else %}0 FCFA{% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- FILTRES -->
+<div class="panel">
+    <div class="panel-header"><h5><i class="fas fa-filter text-primary"></i> Filtres</h5></div>
+    <div class="panel-body">
+        <form method="GET" class="form-modern row g-2">
+            <div class="col-md-3">
+                <label>Date de début</label>
+                <input type="date" name="date_debut" value="{{ date_debut }}">
+            </div>
+            <div class="col-md-3">
+                <label>Date de fin</label>
+                <input type="date" name="date_fin" value="{{ date_fin }}">
+            </div>
+            <div class="col-md-3">
+                <label>Mode de paiement</label>
+                <select name="mode">
+                    <option value="">Tous</option>
+                    <option value="especes" {% if mode=='especes' %}selected{% endif %}>Espèces</option>
+                    <option value="mobile_money" {% if mode=='mobile_money' %}selected{% endif %}>Mobile Money</option>
+                    <option value="carte" {% if mode=='carte' %}selected{% endif %}>Carte</option>
+                    <option value="virement" {% if mode=='virement' %}selected{% endif %}>Virement</option>
+                </select>
+            </div>
+            <div class="col-md-3 d-flex align-items-end gap-2">
+                <button class="btn-modern btn-primary-m" style="flex:1;justify-content:center;">
+                    <i class="fas fa-search"></i> Filtrer
+                </button>
+                <a href="{{ url_for('ventes') }}" class="btn-modern btn-light-m">
+                    <i class="fas fa-rotate"></i>
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- GRAPHIQUES -->
+<div class="row g-3">
+    <div class="col-lg-7">
+        <div class="panel">
+            <div class="panel-header"><h5><i class="fas fa-chart-area text-primary"></i> Évolution des ventes</h5></div>
+            <div class="panel-body"><canvas id="chartEvolution" height="120"></canvas></div>
+        </div>
+    </div>
+    <div class="col-lg-5">
+        <div class="panel">
+            <div class="panel-header"><h5><i class="fas fa-chart-pie text-warning"></i> Modes de paiement</h5></div>
+            <div class="panel-body"><canvas id="chartPaiement" height="200"></canvas></div>
+        </div>
+    </div>
+</div>
+
+<!-- TOP TRAJETS -->
+<div class="panel">
+    <div class="panel-header"><h5><i class="fas fa-trophy text-warning"></i> Top trajets par revenus</h5></div>
+    <table class="table-modern">
+        <thead>
+            <tr>
+                <th>Rang</th>
+                <th>Trajet</th>
+                <th>Nb ventes</th>
+                <th>Revenus</th>
+                <th style="width:30%;">Performance</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for t in top_trajets %}
+            <tr>
+                <td><strong>#{{ loop.index }}</strong></td>
+                <td><strong>{{ t.trajet }}</strong></td>
+                <td>{{ t.nb_ventes }}</td>
+                <td><strong style="color:var(--success);">{{ t.total|money }}</strong></td>
+                <td>
+                    <div class="progress-mini">
+                        {% set max_val = top_trajets[0].total if top_trajets else 1 %}
+                        <div style="width: {{ (t.total / max_val * 100) if max_val else 0 }}%;"></div>
+                    </div>
+                </td>
+            </tr>
+            {% else %}
+            <tr><td colspan="5" class="text-center text-muted py-4">Aucune vente</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- LISTE VENTES -->
+<div class="panel">
+    <div class="panel-header">
+        <h5><i class="fas fa-list-ul text-info"></i> Détail des ventes ({{ nb_ventes }})</h5>
+    </div>
+    <div style="overflow-x:auto;">
+    <table class="table-modern">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Date</th>
+                <th>Client</th>
+                <th>Trajet</th>
+                <th>Place</th>
+                <th>Montant</th>
+                <th>Mode</th>
+                <th>Agent</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for v in ventes %}
+            <tr>
+                <td><strong>#{{ v.id }}</strong></td>
+                <td><small>{{ v.date_vente|datetime }}</small></td>
+                <td><strong>{{ v.client }}</strong></td>
+                <td>{{ v.trajet }}</td>
+                <td><span class="badge-modern badge-actif">N°{{ v.numero_place }}</span></td>
+                <td><strong style="color:var(--success);">{{ v.montant|money }}</strong></td>
+                <td>
+                    {% if v.mode_paiement == 'especes' %}
+                        <span class="badge-modern badge-paye"><i class="fas fa-money-bill"></i> Espèces</span>
+                    {% elif v.mode_paiement == 'mobile_money' %}
+                        <span class="badge-modern badge-actif"><i class="fas fa-mobile"></i> Mobile</span>
+                    {% elif v.mode_paiement == 'carte' %}
+                        <span class="badge-modern badge-attente"><i class="fas fa-credit-card"></i> Carte</span>
+                    {% else %}
+                        <span class="badge-modern badge-complet"><i class="fas fa-building-columns"></i> Virement</span>
+                    {% endif %}
+                </td>
+                <td><small>{{ v.agent or 'N/A' }}</small></td>
+            </tr>
+            {% else %}
+            <tr><td colspan="8" class="text-center text-muted py-5">
+                <i class="fas fa-inbox fa-2x mb-2"></i><br>Aucune vente trouvée
+            </td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Évolution
+const evoLabels = [{% for e in evolution|reverse %}'{{ e.jour }}',{% endfor %}];
+const evoData = [{% for e in evolution|reverse %}{{ e.total }},{% endfor %}];
+
+new Chart(document.getElementById('chartEvolution'), {
+    type: 'bar',
+    data: { labels: evoLabels, datasets: [{
+        label:'Revenus', data: evoData,
+        backgroundColor: 'rgba(79,70,229,0.7)',
+        borderRadius: 8
+    }]},
+    options: { responsive:true, plugins:{legend:{display:false}},
+        scales:{ y:{ beginAtZero:true, ticks:{callback:v=>v.toLocaleString()+' F'}}}}
+});
+
+// Modes de paiement
+const modeLabels = [{% for m,t in repartition.items() %}'{{ m|replace("_"," ")|title }}',{% endfor %}];
+const modeData = [{% for m,t in repartition.items() %}{{ t }},{% endfor %}];
+
+new Chart(document.getElementById('chartPaiement'), {
+    type: 'doughnut',
+    data: { labels: modeLabels, datasets:[{
+        data: modeData,
+        backgroundColor:['#10b981','#4f46e5','#f59e0b','#ec4899'],
+        borderWidth: 4, borderColor:'#fff'
+    }]},
+    options: { responsive:true, plugins:{legend:{position:'bottom'}}}
+});
+</script>
+{% endblock %}

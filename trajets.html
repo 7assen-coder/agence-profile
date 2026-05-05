@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+{% block title %}Trajets{% endblock %}
+{% block page_title %}Gestion des trajets{% endblock %}
+{% block page_subtitle %}Liste complète des trajets et leur état{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-end mb-3">
+    <a href="{{ url_for('nouveau_trajet') }}" class="btn-modern btn-primary-m">
+        <i class="fas fa-plus"></i> Nouveau trajet
+    </a>
+</div>
+
+<div class="row g-3">
+    {% for t in trajets %}
+    <div class="col-md-6 col-lg-4">
+        <div class="panel" style="margin-bottom:0;">
+            <div class="panel-body">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <div>
+                        <h5 style="margin:0;font-weight:700;">
+                            <i class="fas fa-location-dot text-primary"></i> {{ t.ville_depart }}
+                        </h5>
+                        <div style="margin:6px 0;color:var(--gray);">
+                            <i class="fas fa-arrow-down"></i>
+                        </div>
+                        <h5 style="margin:0;font-weight:700;">
+                            <i class="fas fa-flag-checkered text-success"></i> {{ t.ville_arrivee }}
+                        </h5>
+                    </div>
+                    {% if t.statut == 'actif' and t.places_dispo > 0 %}
+                        <span class="badge-modern badge-paye">Actif</span>
+                    {% elif t.places_dispo == 0 %}
+                        <span class="badge-modern badge-complet">Complet</span>
+                    {% else %}
+                        <span class="badge-modern badge-annule">{{ t.statut|title }}</span>
+                    {% endif %}
+                </div>
+
+                <hr>
+                <div style="font-size:0.88rem;">
+                    <p><i class="fas fa-calendar text-info"></i> <strong>{{ t.date_depart }}</strong> à {{ t.heure_depart }}</p>
+                    <p><i class="fas fa-tag text-warning"></i> <strong>{{ t.prix|money }}</strong></p>
+                    {% if t.immatriculation %}
+                    <p><i class="fas fa-bus text-primary"></i> Bus {{ t.immatriculation }}</p>
+                    {% endif %}
+                </div>
+
+                <div style="margin-top:12px;">
+                    <div style="display:flex;justify-content:space-between;font-size:0.85rem;margin-bottom:6px;">
+                        <span><strong>{{ t.places_vendues }}</strong>/{{ t.capacite_totale }} places</span>
+                        <span style="color:var(--gray);">{{ t.taux_remplissage }}%</span>
+                    </div>
+                    <div class="progress-mini">
+                        <div style="width: {{ t.taux_remplissage }}%;
+                             background:{% if t.taux_remplissage >= 100 %}linear-gradient(90deg,#ef4444,#dc2626)
+                             {% elif t.taux_remplissage >= 70 %}linear-gradient(90deg,#f59e0b,#d97706)
+                             {% else %}linear-gradient(90deg,#10b981,#059669){% endif %};"></div>
+                    </div>
+                    <small style="color:var(--gray);">{{ t.places_dispo }} place(s) disponible(s)</small>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="col-12">
+        <div class="panel"><div class="panel-body text-center text-muted py-5">
+            <i class="fas fa-route fa-3x mb-3"></i>
+            <h5>Aucun trajet enregistré</h5>
+        </div></div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}
