@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% block title %}Paiement — VoyageMR{% endblock %}
+{% block extra_css %}
+<style>
+  .payment-grid{display:grid;grid-template-columns:1fr 360px;gap:2rem;align-items:start}
+  .payment-card{background:#fff;border-radius:20px;padding:2.5rem;box-shadow:0 4px 24px rgba(15,37,68,.08);border:1px solid rgba(200,210,230,.5)}
+  .payment-card h2{font-family:'Playfair Display',serif;font-size:1.6rem;color:var(--navy);margin-bottom:.4rem}
+  .subtitle{color:var(--muted);font-size:.9rem;margin-bottom:2rem;padding-bottom:1.5rem;border-bottom:1px solid rgba(200,210,230,.5)}
+  .steps{display:flex;border-radius:12px;overflow:hidden;border:1.5px solid rgba(200,210,230,.5);margin-bottom:2rem}
+  .step{flex:1;text-align:center;padding:.7rem .5rem;font-size:.8rem;font-weight:600;color:var(--muted);border-right:1px solid rgba(200,210,230,.5)}
+  .step:last-child{border-right:none}
+  .step.done{background:#d4f5e2;color:#1a6b3c}
+  .step.active{background:var(--navy);color:#fff}
+  .step span{display:block;font-size:1rem;margin-bottom:.1rem}
+  .methods{display:grid;grid-template-columns:1fr 1fr;gap:.8rem;margin-bottom:1.5rem}
+  .method input[type=radio]{position:absolute;opacity:0;width:0;height:0}
+  .method{position:relative}
+  .method label{display:flex;flex-direction:column;align-items:center;gap:.4rem;padding:1.2rem 1rem;border:2px solid rgba(200,210,230,.6);border-radius:12px;cursor:pointer;transition:all .2s;text-align:center}
+  .method label:hover{border-color:var(--blue)}
+  .method input:checked + label{border-color:var(--blue);background:rgba(26,60,110,.06);box-shadow:0 0 0 3px rgba(26,60,110,.1)}
+  .method-icon{font-size:1.8rem}
+  .method-name{font-size:.85rem;font-weight:600;color:var(--navy)}
+  .recap-card{background:var(--navy);border-radius:20px;padding:2rem;color:#fff;position:sticky;top:90px}
+  .recap-card h3{font-family:'Playfair Display',serif;font-size:1.2rem;color:var(--gold);margin-bottom:1.5rem}
+  .r-row{padding:.65rem 0;border-bottom:1px solid rgba(255,255,255,.08);display:flex;justify-content:space-between;font-size:.88rem}
+  .r-row:last-child{border-bottom:none}
+  .r-label{color:rgba(255,255,255,.5);font-size:.78rem}
+  .r-value{font-weight:600}
+  .r-total{margin-top:1.2rem;padding-top:1.2rem;border-top:2px solid rgba(232,184,75,.3);display:flex;justify-content:space-between;align-items:center}
+  .r-amount{font-size:1.7rem;font-weight:700;color:var(--gold)}
+  .secure{display:flex;align-items:center;gap:.5rem;margin-top:1.2rem;padding:.75rem 1rem;background:rgba(46,204,113,.1);border:1px solid rgba(46,204,113,.2);border-radius:10px;font-size:.8rem;color:rgba(255,255,255,.7)}
+</style>
+{% endblock %}
+{% block content %}
+<div class="page-header">
+  <h1>💳 Paiement</h1>
+  <p>Réservation N° {{ reservation.id_reservation }}</p>
+</div>
+<div class="payment-grid">
+  <div class="payment-card">
+    <div class="steps">
+      <div class="step done"><span>✓</span>Réservation</div>
+      <div class="step active"><span>2</span>Paiement</div>
+      <div class="step"><span>3</span>Ticket</div>
+    </div>
+    <h2>Mode de paiement</h2>
+    <p class="subtitle">Sélectionnez votre méthode préférée</p>
+    <form method="POST">
+      <div class="methods">
+        <div class="method"><input type="radio" name="mode_paiement" id="m1" value="especes" checked><label for="m1"><span class="method-icon">💵</span><span class="method-name">Espèces</span></label></div>
+        <div class="method"><input type="radio" name="mode_paiement" id="m2" value="carte"><label for="m2"><span class="method-icon">💳</span><span class="method-name">Carte bancaire</span></label></div>
+        <div class="method"><input type="radio" name="mode_paiement" id="m3" value="mobile_money"><label for="m3"><span class="method-icon">📱</span><span class="method-name">Mobile Money</span></label></div>
+        <div class="method"><input type="radio" name="mode_paiement" id="m4" value="virement"><label for="m4"><span class="method-icon">🏦</span><span class="method-name">Virement</span></label></div>
+      </div>
+      <button type="submit" class="btn btn-gold" style="width:100%;justify-content:center;padding:1rem;font-size:1rem">
+        ✅ Confirmer le paiement de {{ reservation.prix }} MRU
+      </button>
+    </form>
+  </div>
+  <div class="recap-card">
+    <h3>📋 Récapitulatif</h3>
+    <div class="r-row"><span class="r-label">Passager</span><span class="r-value">{{ reservation.prenom }} {{ reservation.nom }}</span></div>
+    <div class="r-row"><span class="r-label">Trajet</span><span class="r-value">{{ reservation.depart }} → {{ reservation.arrivee }}</span></div>
+    <div class="r-row"><span class="r-label">Date</span><span class="r-value">{{ reservation.date_depart.strftime('%d/%m/%Y') }}</span></div>
+    <div class="r-row"><span class="r-label">Heure</span><span class="r-value">{{ reservation.heure_depart }}</span></div>
+    <div class="r-row"><span class="r-label">Place</span><span class="r-value">N° {{ reservation.numero_place }}</span></div>
+    <div class="r-row"><span class="r-label">Agence</span><span class="r-value">{{ reservation.nom_agence }}</span></div>
+    <div class="r-total"><span style="color:rgba(255,255,255,.7)">Total</span><div class="r-amount">{{ reservation.prix }} <small style="font-size:.85rem;font-weight:400">MRU</small></div></div>
+    <div class="secure">🔒 Paiement sécurisé — Ticket généré instantanément</div>
+  </div>
+</div>
+{% endblock %}

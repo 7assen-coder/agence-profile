@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% block title %}Dashboard — VoyageMR{% endblock %}
+{% block extra_css %}
+<style>
+  .dash-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:2rem}
+  .dash-top h1{font-family:'Playfair Display',serif;font-size:1.8rem;color:var(--navy)}
+  .dash-top p{color:var(--muted);font-size:.9rem;margin-top:.2rem}
+  .kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1.2rem;margin-bottom:2rem}
+  .kpi{background:#fff;border-radius:16px;padding:1.5rem 1.8rem;border:1px solid rgba(200,210,230,.4);box-shadow:0 2px 16px rgba(15,37,68,.07);position:relative;overflow:hidden;transition:transform .2s}
+  .kpi:hover{transform:translateY(-3px)}
+  .kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:4px}
+  .kpi.blue::before{background:linear-gradient(90deg,var(--navy),var(--blue))}
+  .kpi.gold::before{background:linear-gradient(90deg,var(--accent),var(--gold))}
+  .kpi.green::before{background:linear-gradient(90deg,#1a6b3c,#2ecc71)}
+  .kpi.purple::before{background:linear-gradient(90deg,#6a0dad,#9b59b6)}
+  .kpi-icon{font-size:1.8rem;margin-bottom:.8rem}
+  .kpi-number{font-size:2.2rem;font-weight:800;color:var(--navy);line-height:1;margin-bottom:.3rem}
+  .kpi-label{font-size:.82rem;color:var(--muted);font-weight:500}
+  .table-card{background:#fff;border-radius:20px;box-shadow:0 4px 24px rgba(15,37,68,.07);border:1px solid rgba(200,210,230,.4);overflow:hidden}
+  .table-head{padding:1.5rem 2rem;border-bottom:1px solid rgba(200,210,230,.5);display:flex;justify-content:space-between;align-items:center}
+  .table-head h3{font-family:'Playfair Display',serif;font-size:1.2rem;color:var(--navy)}
+  table{width:100%;border-collapse:collapse}
+  thead th{padding:.85rem 1.5rem;text-align:left;font-size:.75rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.7px;background:var(--light);border-bottom:1px solid rgba(200,210,230,.5)}
+  tbody td{padding:1rem 1.5rem;font-size:.88rem;border-bottom:1px solid rgba(200,210,230,.3);vertical-align:middle}
+  tbody tr:last-child td{border-bottom:none}
+  tbody tr:hover{background:rgba(26,60,110,.025)}
+  .p-name{font-weight:600;color:var(--navy)}
+  .p-date{font-size:.78rem;color:var(--muted)}
+  .route-cell{display:flex;align-items:center;gap:.4rem;font-weight:500}
+  .route-arr{color:var(--accent)}
+  .tcode{font-family:monospace;font-size:.78rem;background:var(--light);padding:.2rem .5rem;border-radius:5px;color:var(--muted)}
+  .st{display:inline-flex;align-items:center;gap:.3rem;padding:.28rem .75rem;border-radius:50px;font-size:.75rem;font-weight:700}
+  .st-confirmee{background:#d4f5e2;color:#1a6b3c}
+  .st-en_attente{background:#fff3cd;color:#856404}
+  .st-annulee{background:#fde8e8;color:#8b1a1a}
+  .empty{text-align:center;padding:3rem;color:var(--muted)}
+</style>
+{% endblock %}
+{% block content %}
+<div class="dash-top">
+  <div><h1>📊 Dashboard Admin</h1><p>Vue d'ensemble des réservations</p></div>
+  <a href="/reserver" class="btn btn-primary">+ Nouvelle réservation</a>
+</div>
+<div class="kpi-grid">
+  <div class="kpi blue"><div class="kpi-icon">📋</div><div class="kpi-number">{{ total_reservations }}</div><div class="kpi-label">Réservations totales</div></div>
+  <div class="kpi green"><div class="kpi-icon">✅</div><div class="kpi-number">{{ total_confirmees }}</div><div class="kpi-label">Confirmées</div></div>
+  <div class="kpi purple"><div class="kpi-icon">🎫</div><div class="kpi-number">{{ total_tickets }}</div><div class="kpi-label">Tickets générés</div></div>
+  <div class="kpi gold"><div class="kpi-icon">💰</div><div class="kpi-number">{{ total_revenus | int }}</div><div class="kpi-label">Revenus (MRU)</div></div>
+</div>
+<div class="table-card">
+  <div class="table-head">
+    <h3>🗂️ Dernières réservations</h3>
+    <span style="font-size:.82rem;color:var(--muted)">{{ reservations|length }} résultats</span>
+  </div>
+  {% if reservations %}
+  <table>
+    <thead>
+      <tr><th>#</th><th>Passager</th><th>Trajet</th><th>Date départ</th><th>Statut</th><th>Code ticket</th><th>Action</th></tr>
+    </thead>
+    <tbody>
+      {% for r in reservations %}
+      <tr>
+        <td style="color:var(--muted);font-weight:600">{{ r.id_reservation }}</td>
+        <td><div class="p-name">{{ r.prenom }} {{ r.nom }}</div><div class="p-date">{{ r.date_reservation.strftime('%d/%m/%Y') }}</div></td>
+        <td><div class="route-cell"><span>{{ r.depart }}</span><span class="route-arr">→</span><span>{{ r.arrivee }}</span></div></td>
+        <td>{{ r.date_depart.strftime('%d/%m/%Y') }}</td>
+        <td><span class="st st-{{ r.statut }}">{% if r.statut=='confirmee' %}✅{% elif r.statut=='annulee' %}❌{% else %}⏳{% endif %} {{ r.statut|replace('_',' ')|title }}</span></td>
+        <td>{% if r.code_ticket %}<span class="tcode">{{ r.code_ticket }}</span>{% else %}<span style="color:var(--muted);font-style:italic;font-size:.78rem">—</span>{% endif %}</td>
+        <td>
+          {% if r.statut=='en_attente' %}<a href="/paiement/{{ r.id_reservation }}" class="btn btn-gold" style="padding:.35rem .85rem;font-size:.8rem">💳 Payer</a>
+          {% elif r.code_ticket %}<a href="/ticket/{{ r.id_reservation }}" class="btn btn-outline" style="padding:.35rem .85rem;font-size:.8rem">🎫 Ticket</a>{% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <div class="empty"><p>Aucune réservation. <a href="/init-db">Initialiser les données →</a></p></div>
+  {% endif %}
+</div>
+{% endblock %}

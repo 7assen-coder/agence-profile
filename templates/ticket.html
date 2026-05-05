@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+{% block title %}Ticket {{ ticket.code_ticket }}{% endblock %}
+{% block extra_css %}
+<style>
+  .success-banner{background:linear-gradient(135deg,#1a6b3c,#2ecc71);border-radius:16px;padding:1.5rem 2rem;color:#fff;display:flex;align-items:center;gap:1.2rem;margin-bottom:2rem;box-shadow:0 6px 24px rgba(46,204,113,.25)}
+  .success-banner .icon{font-size:2.5rem}
+  .success-banner h2{font-size:1.3rem;font-weight:700;margin-bottom:.2rem}
+  .success-banner p{opacity:.85;font-size:.9rem}
+  .ticket-wrapper{display:grid;grid-template-columns:1fr 260px;gap:2rem;align-items:start}
+  .ticket-body{background:#fff;border-radius:20px;overflow:hidden;box-shadow:0 8px 40px rgba(15,37,68,.12);border:1px solid rgba(200,210,230,.4)}
+  .ticket-header{background:linear-gradient(135deg,var(--navy),var(--blue));padding:2rem 2.5rem;color:#fff;position:relative;overflow:hidden}
+  .ticket-header::after{content:'🚌';position:absolute;right:1.5rem;top:50%;transform:translateY(-50%);font-size:5rem;opacity:.1}
+  .agency{font-size:.78rem;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--gold);margin-bottom:.6rem}
+  .route{font-family:'Playfair Display',serif;font-size:2rem;font-weight:700;display:flex;align-items:center;gap:.8rem}
+  .route .arr{color:var(--gold)}
+  .code{margin-top:.8rem;font-size:.85rem;opacity:.7;font-family:monospace}
+  .perfo{display:flex;align-items:center;padding:0 1rem;background:var(--light);position:relative}
+  .perfo::before,.perfo::after{content:'';position:absolute;top:50%;transform:translateY(-50%);width:28px;height:28px;border-radius:50%;background:var(--light)}
+  .perfo::before{left:-14px} .perfo::after{right:-14px}
+  .perfo-line{flex:1;border-top:2px dashed rgba(200,210,230,.8);margin:.7rem 1rem}
+  .perfo-text{font-size:.72rem;color:var(--muted);font-weight:600;white-space:nowrap}
+  .ticket-content{padding:2rem 2.5rem}
+  .info-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;margin-bottom:1.5rem}
+  .info-item{display:flex;flex-direction:column;gap:.2rem}
+  .info-label{font-size:.72rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.8px}
+  .info-value{font-size:1rem;font-weight:700;color:var(--navy)}
+  .ticket-footer-bar{background:var(--light);padding:1rem 2.5rem;display:flex;justify-content:space-between;align-items:center;border-top:1px solid rgba(200,210,230,.5)}
+  .statut-badge{display:inline-flex;align-items:center;gap:.4rem;padding:.4rem 1rem;border-radius:50px;font-size:.82rem;font-weight:700;background:#d4f5e2;color:#1a6b3c}
+  .generated-at{font-size:.78rem;color:var(--muted)}
+  .sidebar{display:flex;flex-direction:column;gap:1.2rem}
+  .qr-card{background:#fff;border-radius:16px;padding:1.8rem;text-align:center;box-shadow:0 4px 20px rgba(15,37,68,.08);border:1px solid rgba(200,210,230,.4)}
+  .qr-card h4{font-size:.82rem;font-weight:700;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:1rem}
+  .qr-card img{width:160px;height:160px;border-radius:10px;border:3px solid var(--light)}
+  .qr-code{margin-top:.8rem;font-family:monospace;font-size:.78rem;color:var(--muted);word-break:break-all}
+  .actions-card{background:#fff;border-radius:16px;padding:1.5rem;box-shadow:0 4px 20px rgba(15,37,68,.08);border:1px solid rgba(200,210,230,.4)}
+  .actions-card h4{font-size:.82rem;font-weight:700;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:1rem}
+  .action-btn{display:flex;align-items:center;gap:.7rem;width:100%;padding:.85rem 1rem;border-radius:10px;text-decoration:none;font-size:.9rem;font-weight:600;margin-bottom:.6rem;transition:all .2s;border:none;cursor:pointer;font-family:'DM Sans',sans-serif}
+  .action-btn.primary{background:linear-gradient(135deg,var(--blue),var(--navy));color:#fff}
+  .action-btn.primary:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(26,60,110,.3)}
+  .action-btn.secondary{background:var(--light);color:var(--navy);border:1.5px solid rgba(200,210,230,.6)}
+  .action-btn.secondary:hover{background:rgba(26,60,110,.05)}
+</style>
+{% endblock %}
+{% block content %}
+<div class="success-banner">
+  <div class="icon">🎉</div>
+  <div>
+    <h2>Paiement confirmé ! Votre ticket est prêt.</h2>
+    <p>Réservation N° {{ ticket.id_reservation }}</p>
+  </div>
+</div>
+<div class="ticket-wrapper">
+  <div class="ticket-body">
+    <div class="ticket-header">
+      <div class="agency">{{ ticket.nom_agence }}</div>
+      <div class="route"><span>{{ ticket.depart }}</span><span class="arr">→</span><span>{{ ticket.arrivee }}</span></div>
+      <div class="code">{{ ticket.code_ticket }}</div>
+    </div>
+    <div class="perfo"><div class="perfo-line"></div><span class="perfo-text">✂ TICKET DE VOYAGE</span><div class="perfo-line"></div></div>
+    <div class="ticket-content">
+      <div class="info-grid">
+        <div class="info-item"><span class="info-label">👤 Passager</span><span class="info-value">{{ ticket.prenom }} {{ ticket.nom }}</span></div>
+        <div class="info-item"><span class="info-label">💺 Place</span><span class="info-value" style="font-size:1.4rem">{{ ticket.numero_place }}</span></div>
+        <div class="info-item"><span class="info-label">📅 Date</span><span class="info-value">{{ ticket.date_depart.strftime('%d/%m/%Y') }}</span></div>
+        <div class="info-item"><span class="info-label">⏰ Heure</span><span class="info-value">{{ ticket.heure_depart }}</span></div>
+        <div class="info-item"><span class="info-label">🏢 Agence</span><span class="info-value">{{ ticket.nom_agence }}</span></div>
+        <div class="info-item"><span class="info-label">🎫 Réservation</span><span class="info-value">#{{ ticket.id_reservation }}</span></div>
+      </div>
+    </div>
+    <div class="ticket-footer-bar">
+      <div class="statut-badge">✅ {{ ticket.statut | upper }}</div>
+      <div class="generated-at">Généré le {{ ticket.date_generation.strftime('%d/%m/%Y à %H:%M') }}</div>
+    </div>
+  </div>
+  <div class="sidebar">
+    <div class="qr-card">
+      <h4>🔳 QR Code</h4>
+      {% if ticket.qr_code_path %}
+        <img src="/{{ ticket.qr_code_path }}" alt="QR Code">
+      {% else %}
+        <div style="width:160px;height:160px;background:var(--light);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:3rem;margin:0 auto">🔳</div>
+      {% endif %}
+      <div class="qr-code">{{ ticket.code_ticket }}</div>
+    </div>
+    <div class="actions-card">
+      <h4>⚡ Actions</h4>
+      <a href="/ticket/{{ ticket.id_reservation }}/pdf" class="action-btn primary">📥 Télécharger PDF</a>
+      <a href="/reserver" class="action-btn secondary">🎟️ Nouvelle réservation</a>
+      <a href="/" class="action-btn secondary">🏠 Retour accueil</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

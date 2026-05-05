@@ -1,0 +1,6 @@
+flask
+flask-mysqldb
+mysql-connector-python
+qrcode[pil]
+reportlab
+pillow

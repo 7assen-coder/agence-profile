@@ -1,10 +1,101 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
-
-</body>
-</html>
+{% extends "base.html" %}
+{% block title %}Réservation — VoyageMR{% endblock %}
+{% block extra_css %}
+<style>
+  .booking-grid{display:grid;grid-template-columns:1fr 380px;gap:2rem;align-items:start}
+  .form-card{background:#fff;border-radius:20px;padding:2.5rem;box-shadow:0 4px 24px rgba(15,37,68,.08);border:1px solid rgba(200,210,230,.5)}
+  .form-card h2{font-family:'Playfair Display',serif;font-size:1.6rem;color:var(--navy);margin-bottom:.4rem}
+  .form-card .subtitle{color:var(--muted);font-size:.9rem;margin-bottom:2rem;padding-bottom:1.5rem;border-bottom:1px solid rgba(200,210,230,.5)}
+  .steps{display:flex;border-radius:12px;overflow:hidden;border:1.5px solid rgba(200,210,230,.5);margin-bottom:2rem}
+  .step{flex:1;text-align:center;padding:.7rem .5rem;font-size:.8rem;font-weight:600;color:var(--muted);border-right:1px solid rgba(200,210,230,.5)}
+  .step:last-child{border-right:none}
+  .step.active{background:var(--navy);color:#fff}
+  .step span{display:block;font-size:1rem;margin-bottom:.1rem}
+  .summary-card{background:var(--navy);border-radius:20px;padding:2rem;color:#fff;position:sticky;top:90px}
+  .summary-card h3{font-family:'Playfair Display',serif;font-size:1.2rem;color:var(--gold);margin-bottom:1.5rem}
+  .s-row{display:flex;justify-content:space-between;padding:.7rem 0;border-bottom:1px solid rgba(255,255,255,.08);font-size:.88rem}
+  .s-row:last-child{border-bottom:none}
+  .s-label{color:rgba(255,255,255,.55);font-size:.8rem}
+  .s-value{font-weight:600;text-align:right}
+  .s-total{margin-top:1.2rem;padding-top:1.2rem;border-top:2px solid rgba(232,184,75,.3);display:flex;justify-content:space-between;align-items:center}
+  .s-amount{font-size:1.6rem;font-weight:700;color:var(--gold)}
+  .info-box{background:rgba(232,184,75,.1);border:1px solid rgba(232,184,75,.3);border-radius:10px;padding:1rem;margin-top:1.5rem;font-size:.82rem;color:rgba(255,255,255,.7);line-height:1.6}
+</style>
+{% endblock %}
+{% block content %}
+<div class="page-header">
+  <h1>🎟️ Réserver une place</h1>
+  <p>Choisissez votre trajet, client et place disponible</p>
+</div>
+<div class="booking-grid">
+  <div class="form-card">
+    <div class="steps">
+      <div class="step active"><span>1</span>Réservation</div>
+      <div class="step"><span>2</span>Paiement</div>
+      <div class="step"><span>3</span>Ticket</div>
+    </div>
+    <form method="POST" action="/reserver">
+      <div class="form-group">
+        <label>👤 Client</label>
+        <select name="id_client" class="form-control" required>
+          <option value="">— Sélectionner un client —</option>
+          {% for c in clients %}
+          <option value="{{ c.id_client }}">{{ c.prenom }} {{ c.nom }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="form-group">
+        <label>🗺️ Trajet</label>
+        <select name="id_trajet" id="trajetSel" class="form-control" required>
+          <option value="">— Sélectionner un trajet —</option>
+          {% for t in trajets %}
+          <option value="{{ t.id_trajet }}" data-prix="{{ t.prix }}" data-depart="{{ t.depart }}" data-arrivee="{{ t.arrivee }}" data-date="{{ t.date_depart }}" data-heure="{{ t.heure_depart }}">
+            {{ t.depart }} → {{ t.arrivee }} — {{ t.date_depart }} ({{ t.prix }} MRU)
+          </option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="form-group">
+        <label>💺 Place</label>
+        <select name="id_place" id="placeSel" class="form-control" required>
+          <option value="">— Sélectionner une place —</option>
+          {% for p in places %}
+          <option value="{{ p.id_place }}">Place N° {{ p.numero_place }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      {% if not clients or not trajets or not places %}
+      <div style="background:#fff3cd;border:1px solid #ffc107;border-radius:10px;padding:1rem;margin-bottom:1.5rem;font-size:.88rem;color:#856404">
+        ⚠️ Données manquantes. <a href="/init-db" style="color:inherit;font-weight:700">Initialiser →</a>
+      </div>
+      {% endif %}
+      <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;padding:.9rem">Continuer vers le paiement →</button>
+    </form>
+  </div>
+  <div class="summary-card">
+    <h3>📋 Résumé</h3>
+    <div class="s-row"><span class="s-label">Trajet</span><span class="s-value" id="sumTrajet">—</span></div>
+    <div class="s-row"><span class="s-label">Date</span><span class="s-value" id="sumDate">—</span></div>
+    <div class="s-row"><span class="s-label">Heure</span><span class="s-value" id="sumHeure">—</span></div>
+    <div class="s-row"><span class="s-label">Place</span><span class="s-value" id="sumPlace">—</span></div>
+    <div class="s-total">
+      <span style="color:rgba(255,255,255,.7)">Total</span>
+      <div class="s-amount" id="sumPrix">— MRU</div>
+    </div>
+    <div class="info-box">ℹ️ Le ticket PDF avec QR code sera généré automatiquement après confirmation du paiement.</div>
+  </div>
+</div>
+<script>
+  document.getElementById('trajetSel').addEventListener('change', function() {
+    const o = this.options[this.selectedIndex];
+    document.getElementById('sumTrajet').textContent = o.dataset.depart ? o.dataset.depart+' → '+o.dataset.arrivee : '—';
+    document.getElementById('sumDate').textContent   = o.dataset.date  || '—';
+    document.getElementById('sumHeure').textContent  = o.dataset.heure ? o.dataset.heure.slice(0,5) : '—';
+    document.getElementById('sumPrix').textContent   = o.dataset.prix  ? o.dataset.prix+' MRU' : '— MRU';
+  });
+  document.getElementById('placeSel').addEventListener('change', function() {
+    const o = this.options[this.selectedIndex];
+    document.getElementById('sumPlace').textContent = o.value ? 'Place #'+o.text.replace('Place N° ','') : '—';
+  });
+</script>
+{% endblock %}
