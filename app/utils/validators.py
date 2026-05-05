@@ -1,20 +1,35 @@
-import os
-import uuid
-from werkzeug.utils import secure_filename
-from flask import current_app
+import re
 
+def is_required(value):
+    return value is not None and str(value).strip() != ""
 
-def allowed_file(filename: str) -> bool:
-    if "." not in filename:
+def is_valid_email(email):
+    if not is_required(email):
         return False
-    ext = filename.rsplit(".", 1)[1].lower()
-    return ext in current_app.config["ALLOWED_EXTENSIONS"]
+    pattern = r"^[\w\.-]+@[\w\.-]+\.\w+$"
+    return re.match(pattern, email) is not None
 
+def is_valid_phone(phone):
+    if not is_required(phone):
+        return False
+    pattern = r"^[0-9+\s-]{8,20}$"
+    return re.match(pattern, phone) is not None
 
-def save_logo(file_storage) -> str:
-    filename = secure_filename(file_storage.filename)
-    ext = filename.rsplit(".", 1)[1].lower()
-    unique_name = f"{uuid.uuid4().hex}.{ext}"
-    path = os.path.join(current_app.config["UPLOAD_FOLDER"], unique_name)
-    file_storage.save(path)
-    return unique_name
+def is_positive_number(value):
+    try:
+        return float(value) > 0
+    except (TypeError, ValueError):
+        return False
+
+def is_valid_place_number(numero):
+    try:
+        numero = int(numero)
+        return 1 <= numero <= 12
+    except (TypeError, ValueError):
+        return False
+
+def is_valid_horaire(horaire):
+    return horaire in ["matin", "apres_midi"]
+
+def is_valid_status_reservation(status):
+    return status in ["en_attente", "confirmee", "annulee"]
