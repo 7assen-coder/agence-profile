@@ -1,0 +1,191 @@
+{% extends "base.html" %}
+{% block title %}Bus {{ bus.immatriculation }} — Places{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <div class="page-eyebrow">
+      <a href="{{ url_for('views.index') }}" class="back-link">← Tableau de bord</a>
+    </div>
+    <h1 class="page-title">{{ bus.immatriculation }}</h1>
+  </div>
+  <div class="page-actions">
+    {% if places %}
+      <button class="btn btn-danger btn-sm"
+              onclick="supprimerPlaces({{ bus.id_bus }}, '{{ bus.immatriculation }}')">
+        Supprimer les places
+      </button>
+    {% else %}
+      <button class="btn btn-primary"
+              onclick="genererPlaces({{ bus.id_bus }}, {{ bus.capacite }})">
+        Générer {{ bus.capacite }} places
+      </button>
+    {% endif %}
+  </div>
+</div>
+
+<!-- Bus info -->
+<div class="info-bar">
+  <div class="info-item">
+    <span class="info-label">Agence</span>
+    <span class="info-value">{{ bus.nom_agence }}</span>
+  </div>
+  <div class="info-item">
+    <span class="info-label">Capacité</span>
+    <span class="info-value">{{ bus.capacite }} places</span>
+  </div>
+  <div class="info-item">
+    <span class="info-label">Places générées</span>
+    <span class="info-value">{{ places | length }}</span>
+  </div>
+  {% if places %}
+  <div class="info-item">
+    <span class="info-label">Libres</span>
+    <span class="info-value accent">
+      {{ places | selectattr('statut_place', 'equalto', 'libre') | list | length }}
+    </span>
+  </div>
+  <div class="info-item">
+    <span class="info-label">Réservées</span>
+    <span class="info-value warn">
+      {{ places | rejectattr('statut_place', 'equalto', 'libre') | list | length }}
+    </span>
+  </div>
+  {% endif %}
+</div>
+
+{% if places %}
+<!-- Légende -->
+<div class="legend">
+  <div class="legend-item"><div class="seat seat--libre seat--sm"></div> Libre</div>
+  <div class="legend-item"><div class="seat seat--en_attente seat--sm"></div> En attente</div>
+  <div class="legend-item"><div class="seat seat--confirmee seat--sm"></div> Confirmée</div>
+</div>
+
+<!-- Plan du bus -->
+<div class="bus-shell">
+  <div class="bus-front-label">▲ AVANT DU BUS</div>
+  <div class="seat-grid" id="seat-grid" data-capacite="{{ bus.capacite }}">
+    {% set places_dict = {} %}
+    {% for p in places %}
+      {% if places_dict.update({p.numero_place: p}) %}{% endif %}
+    {% endfor %}
+    <!-- Généré par JS avec les données Jinja injectées -->
+  </div>
+  <div class="bus-back-label">▼ ARRIÈRE</div>
+</div>
+
+<!-- Données pour JS -->
+<script>
+const PLACES_DATA = {{ places | tojson }};
+const BUS_CAPACITE = {{ bus.capacite }};
+</script>
+
+{% else %}
+<div class="empty-state">
+  <div class="empty-icon">🪑</div>
+  <p>Aucune place générée pour ce bus.</p>
+  <button class="btn btn-primary" onclick="genererPlaces({{ bus.id_bus }}, {{ bus.capacite }})">
+    Générer les {{ bus.capacite }} places
+  </button>
+</div>
+{% endif %}
+
+<!-- Modal -->
+<div class="modal-overlay" id="modal" onclick="closeModal()">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-head">
+      <span id="modal-title">Résultat</span>
+      <button onclick="closeModal()" class="modal-close">✕</button>
+    </div>
+    <div class="modal-body">
+      <div id="modal-status-badge"></div>
+      <pre id="modal-json" class="json-viewer"></pre>
+    </div>
+    <div class="modal-foot">
+      <button onclick="closeModal(); location.reload()" class="btn btn-primary btn-sm">Rafraîchir</button>
+      <button onclick="closeModal()" class="btn btn-secondary btn-sm">Fermer</button>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+async function genererPlaces(busId, capacite) {
+  showModal('Génération en cours…', null, null);
+  try {
+    const res = await fetch('/api/places/generer', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ bus_id: busId, capacite: capacite }),
+    });
+    const data = await res.json();
+    showModal('Génération des places', res.status, data);
+  } catch (e) {
+    showModal('Erreur', 0, { erreur: e.message });
+  }
+}
+
+async function supprimerPlaces(busId, immat) {
+  if (!confirm(`Supprimer toutes les places du bus ${immat} ?`)) return;
+  try {
+    const res = await fetch(`/api/places/${busId}`, { method: 'DELETE' });
+    const data = await res.json();
+    showModal('Suppression', res.status, data);
+  } catch (e) {
+    showModal('Erreur', 0, { erreur: e.message });
+  }
+}
+
+// ── Rendu du plan de bus ────────────────────────────────────────────────────
+const LAYOUTS = {
+  12: [[1,2],[3,4,5],[6,7,8],[9,10,11,12]],
+  32: [[1,2],[3,4,5],[6,7,8],[9,10,11],[12,13,14],[15,16,17],[18,19,20],[21,22,23],[24,25,26],[27,28,29,30,31,32]],
+};
+function gen60(){const r=[[1,2]];let n=3;for(let i=0;i<13;i++){r.push([n,n+1,n+2]);n+=3;}const l=[];while(n<=60)l.push(n++);r.push(l);return r;}
+LAYOUTS[60] = gen60();
+
+function renderSeats() {
+  const grid = document.getElementById('seat-grid');
+  if (!grid || typeof PLACES_DATA === 'undefined') return;
+
+  const statMap = {};
+  PLACES_DATA.forEach(p => { statMap[p.numero_place] = p.statut_place; });
+
+  const layout = LAYOUTS[BUS_CAPACITE] || LAYOUTS[15];
+  grid.innerHTML = '';
+
+  layout.forEach((row, ri) => {
+    const rowEl = document.createElement('div');
+    rowEl.className = 'seat-row' + (ri === layout.length - 1 ? ' seat-row--last' : '');
+
+    const addSeat = (num) => {
+      const s = document.createElement('div');
+      const statut = statMap[num] || 'libre';
+      s.className = `seat seat--${statut}`;
+      s.style.animationDelay = (num * 15) + 'ms';
+      s.innerHTML = `<span class="seat-num">${num}</span>`;
+      s.title = `Place ${num} — ${statut}`;
+      rowEl.appendChild(s);
+    };
+
+    if (row.length === 2) {
+      addSeat(row[0]);
+      const a = document.createElement('div'); a.className = 'seat-aisle'; rowEl.appendChild(a);
+      addSeat(row[1]);
+    } else if (row.length === 3) {
+      addSeat(row[0]);
+      const a = document.createElement('div'); a.className = 'seat-aisle'; rowEl.appendChild(a);
+      addSeat(row[1]); addSeat(row[2]);
+    } else {
+      row.forEach(n => addSeat(n));
+    }
+    grid.appendChild(rowEl);
+  });
+}
+
+renderSeats();
+</script>
+{% endblock %}

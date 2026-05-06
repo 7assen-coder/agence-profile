@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+{% block title %}Tableau de bord — Gestion des Places{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <div class="page-eyebrow">Module</div>
+    <h1 class="page-title">Gestion des Places</h1>
+  </div>
+</div>
+
+<!-- Stats -->
+<div class="stats-grid">
+  <div class="stat-card">
+    <div class="stat-value">{{ stats.nb_bus }}</div>
+    <div class="stat-label">Bus enregistrés</div>
+  </div>
+  <div class="stat-card accent">
+    <div class="stat-value">{{ stats.nb_places }}</div>
+    <div class="stat-label">Places générées</div>
+  </div>
+  <div class="stat-card warn">
+    <div class="stat-value">{{ stats.bus_sans_places }}</div>
+    <div class="stat-label">Bus sans places</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-value">{{ stats.nb_reservations }}</div>
+    <div class="stat-label">Réservations actives</div>
+  </div>
+</div>
+
+<!-- Bus list -->
+<section id="bus-list">
+  <div class="section-head">
+    <h2 class="section-title">Liste des bus</h2>
+    <span class="badge">{{ bus_list | length }} bus</span>
+  </div>
+
+  {% if bus_list %}
+  <div class="bus-grid">
+    {% for bus in bus_list %}
+    <div class="bus-card {% if bus.nb_places_generees == 0 %}bus-card--empty{% endif %}">
+      <div class="bus-card-head">
+        <span class="bus-immat">{{ bus.immatriculation }}</span>
+        {% if bus.nb_places_generees > 0 %}
+          <span class="tag tag-ok">✓ Places générées</span>
+        {% else %}
+          <span class="tag tag-warn">⚠ Aucune place</span>
+        {% endif %}
+      </div>
+      <div class="bus-card-body">
+        <div class="bus-meta">
+          <span class="bus-meta-label">Capacité</span>
+          <span class="bus-meta-value">{{ bus.capacite }} places</span>
+        </div>
+        <div class="bus-meta">
+          <span class="bus-meta-label">Agence</span>
+          <span class="bus-meta-value">{{ bus.nom_agence }}</span>
+        </div>
+        <div class="bus-meta">
+          <span class="bus-meta-label">Places en base</span>
+          <span class="bus-meta-value">{{ bus.nb_places_generees }} / {{ bus.capacite }}</span>
+        </div>
+      </div>
+      <div class="bus-card-foot">
+        {% if bus.nb_places_generees == 0 %}
+          <button class="btn btn-primary btn-sm"
+                  onclick="genererPlaces({{ bus.id_bus }}, {{ bus.capacite }})">
+            Générer les places
+          </button>
+        {% else %}
+          <a href="{{ url_for('views.detail_bus', bus_id=bus.id_bus) }}" class="btn btn-secondary btn-sm">
+            Voir les places
+          </a>
+          <button class="btn btn-danger btn-sm"
+                  onclick="supprimerPlaces({{ bus.id_bus }}, '{{ bus.immatriculation }}')">
+            Supprimer
+          </button>
+        {% endif %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  {% else %}
+  <div class="empty-state">
+    <div class="empty-icon">🚌</div>
+    <p>Aucun bus trouvé dans la base de données.</p>
+    <small>Vérifiez que la table <code>bus</code> contient des données.</small>
+  </div>
+  {% endif %}
+</section>
+
+<!-- Modal réponse API -->
+<div class="modal-overlay" id="modal" onclick="closeModal()">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-head">
+      <span id="modal-title">Résultat</span>
+      <button onclick="closeModal()" class="modal-close">✕</button>
+    </div>
+    <div class="modal-body">
+      <div id="modal-status-badge"></div>
+      <pre id="modal-json" class="json-viewer"></pre>
+    </div>
+    <div class="modal-foot">
+      <button onclick="closeModal(); location.reload()" class="btn btn-primary btn-sm">
+        Rafraîchir la page
+      </button>
+      <button onclick="closeModal()" class="btn btn-secondary btn-sm">Fermer</button>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+async function genererPlaces(busId, capacite) {
+  showModal('Génération en cours…', null, null);
+  try {
+    const res = await fetch('/api/places/generer', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ bus_id: busId, capacite: capacite }),
+    });
+    const data = await res.json();
+    showModal('Génération des places', res.status, data);
+  } catch (e) {
+    showModal('Erreur', 0, { erreur: e.message });
+  }
+}
+
+async function supprimerPlaces(busId, immat) {
+  if (!confirm(`Supprimer toutes les places du bus ${immat} ?`)) return;
+  try {
+    const res = await fetch(`/api/places/${busId}`, { method: 'DELETE' });
+    const data = await res.json();
+    showModal('Suppression des places', res.status, data);
+  } catch (e) {
+    showModal('Erreur', 0, { erreur: e.message });
+  }
+}
+</script>
+{% endblock %}
