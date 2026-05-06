@@ -1,0 +1,824 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Transport Mauritanie — Groupe 30</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Sora:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0e1a;
+    --card: #111827;
+    --border: #1e2d45;
+    --libre: #10b981;
+    --bloquee: #f59e0b;
+    --confirmee: #3b82f6;
+    --annulee: #374151;
+    --text: #f1f5f9;
+    --muted: #64748b;
+    --accent: #6366f1;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Sora', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Background pattern */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse at 20% 20%, rgba(99,102,241,0.08) 0%, transparent 60%),
+      radial-gradient(ellipse at 80% 80%, rgba(16,185,129,0.06) 0%, transparent 60%);
+    pointer-events: none;
+  }
+
+  header {
+    padding: 2rem 2.5rem 1.5rem;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    backdrop-filter: blur(10px);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: rgba(10,14,26,0.85);
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .logo-icon {
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, var(--accent), var(--libre));
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+  }
+
+  .logo h1 {
+    font-family: 'Space Mono', monospace;
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+  }
+
+  .logo span {
+    display: block;
+    font-size: 0.65rem;
+    color: var(--muted);
+    font-family: 'Sora', sans-serif;
+    font-weight: 300;
+  }
+
+  .badge {
+    background: rgba(99,102,241,0.15);
+    border: 1px solid rgba(99,102,241,0.3);
+    color: #a5b4fc;
+    padding: 0.35rem 0.9rem;
+    border-radius: 999px;
+    font-size: 0.72rem;
+    font-family: 'Space Mono', monospace;
+  }
+
+  main {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 2.5rem 2rem;
+  }
+
+  /* Trajet selector */
+  .trajet-bar {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 2.5rem;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 1.25rem 1.5rem;
+  }
+
+  .trajet-bar label {
+    font-size: 0.8rem;
+    color: var(--muted);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    white-space: nowrap;
+  }
+
+  .trajet-bar select {
+    flex: 1;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 0.6rem 1rem;
+    border-radius: 8px;
+    font-family: 'Sora', sans-serif;
+    font-size: 0.9rem;
+    cursor: pointer;
+    outline: none;
+  }
+
+  .btn-refresh {
+    background: var(--accent);
+    color: white;
+    border: none;
+    padding: 0.65rem 1.4rem;
+    border-radius: 8px;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.78rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+
+  .btn-refresh:hover { opacity: 0.85; transform: translateY(-1px); }
+
+  /* Stats row */
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+    margin-bottom: 2.5rem;
+  }
+
+  .stat-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 1.4rem;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.2s;
+  }
+
+  .stat-card:hover { transform: translateY(-2px); }
+
+  .stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    border-radius: 14px 14px 0 0;
+  }
+
+  .stat-card.libre::before   { background: var(--libre); }
+  .stat-card.bloquee::before { background: var(--bloquee); }
+  .stat-card.confirmee::before { background: var(--confirmee); }
+  .stat-card.total::before   { background: var(--accent); }
+
+  .stat-label {
+    font-size: 0.72rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-weight: 600;
+    margin-bottom: 0.6rem;
+  }
+
+  .stat-value {
+    font-family: 'Space Mono', monospace;
+    font-size: 2.2rem;
+    font-weight: 700;
+    line-height: 1;
+  }
+
+  .stat-card.libre   .stat-value { color: var(--libre); }
+  .stat-card.bloquee .stat-value { color: var(--bloquee); }
+  .stat-card.confirmee .stat-value { color: var(--confirmee); }
+  .stat-card.total   .stat-value { color: #a5b4fc; }
+
+  /* Bus layout */
+  .bus-section {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+  }
+
+  .section-title {
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--muted);
+    font-weight: 600;
+    margin-bottom: 1.8rem;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+
+  .section-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* Bus shape */
+  .bus-wrapper {
+    background: rgba(255,255,255,0.02);
+    border: 2px solid var(--border);
+    border-radius: 20px;
+    padding: 2rem 1.5rem;
+    position: relative;
+  }
+
+  .bus-front {
+    text-align: center;
+    font-size: 0.7rem;
+    color: var(--muted);
+    margin-bottom: 1.5rem;
+    font-family: 'Space Mono', monospace;
+    letter-spacing: 0.1em;
+  }
+
+  .seats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.8rem;
+    max-width: 380px;
+    margin: 0 auto;
+  }
+
+  .seat {
+    aspect-ratio: 1;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.25s;
+    border: 2px solid transparent;
+    position: relative;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.85rem;
+    font-weight: 700;
+  }
+
+  .seat:hover { transform: scale(1.08); }
+
+  .seat.libre {
+    background: rgba(16,185,129,0.1);
+    border-color: rgba(16,185,129,0.4);
+    color: var(--libre);
+  }
+
+  .seat.libre:hover {
+    background: rgba(16,185,129,0.2);
+    border-color: var(--libre);
+    box-shadow: 0 0 16px rgba(16,185,129,0.3);
+  }
+
+  .seat.bloquee {
+    background: rgba(245,158,11,0.1);
+    border-color: rgba(245,158,11,0.4);
+    color: var(--bloquee);
+    cursor: not-allowed;
+  }
+
+  .seat.confirmee {
+    background: rgba(59,130,246,0.1);
+    border-color: rgba(59,130,246,0.4);
+    color: var(--confirmee);
+    cursor: not-allowed;
+  }
+
+  .seat .timer {
+    font-size: 0.55rem;
+    font-family: 'Sora', sans-serif;
+    margin-top: 2px;
+    opacity: 0.8;
+  }
+
+  /* Aisle spacer */
+  .seat.aisle {
+    background: transparent;
+    border: none;
+    cursor: default;
+    pointer-events: none;
+  }
+
+  /* Légende */
+  .legend {
+    display: flex;
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.78rem;
+    color: var(--muted);
+  }
+
+  .legend-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 3px;
+  }
+
+  /* Modal */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(4px);
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .modal-overlay.active { display: flex; }
+
+  .modal {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 2.5rem;
+    width: 100%;
+    max-width: 420px;
+    animation: slideUp 0.3s ease;
+  }
+
+  @keyframes slideUp {
+    from { transform: translateY(20px); opacity: 0; }
+    to   { transform: translateY(0);    opacity: 1; }
+  }
+
+  .modal h2 {
+    font-size: 1.2rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .modal p {
+    color: var(--muted);
+    font-size: 0.85rem;
+    margin-bottom: 2rem;
+  }
+
+  .modal-field {
+    margin-bottom: 1.2rem;
+  }
+
+  .modal-field label {
+    display: block;
+    font-size: 0.75rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 0.5rem;
+  }
+
+  .modal-field input, .modal-field select {
+    width: 100%;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 0.75rem 1rem;
+    border-radius: 10px;
+    font-family: 'Sora', sans-serif;
+    font-size: 0.9rem;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .modal-field input:focus, .modal-field select:focus {
+    border-color: var(--accent);
+  }
+
+  .modal-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 2rem;
+  }
+
+  .btn-cancel {
+    flex: 1;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    padding: 0.75rem;
+    border-radius: 10px;
+    font-family: 'Sora', sans-serif;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn-confirm {
+    flex: 2;
+    background: var(--libre);
+    border: none;
+    color: white;
+    padding: 0.75rem;
+    border-radius: 10px;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn-confirm:hover { opacity: 0.85; }
+
+  /* Toast */
+  .toast {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    padding: 1rem 1.5rem;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    z-index: 999;
+    transform: translateY(100px);
+    opacity: 0;
+    transition: all 0.3s;
+    max-width: 320px;
+  }
+
+  .toast.show {
+    transform: translateY(0);
+    opacity: 1;
+  }
+
+  .toast.success {
+    background: rgba(16,185,129,0.2);
+    border: 1px solid rgba(16,185,129,0.4);
+    color: var(--libre);
+  }
+
+  .toast.error {
+    background: rgba(239,68,68,0.2);
+    border: 1px solid rgba(239,68,68,0.4);
+    color: #f87171;
+  }
+
+  /* Trajet info */
+  .trajet-info {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+
+  .info-chip {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 0.9rem 1.2rem;
+  }
+
+  .info-chip .label {
+    font-size: 0.68rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 0.3rem;
+  }
+
+  .info-chip .value {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.95rem;
+    font-weight: 700;
+  }
+
+  .spinner {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(255,255,255,0.2);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <div class="logo-icon">🚌</div>
+    <h1>TransportMR
+      <span>Plateforme de réservation · Groupe 30</span>
+    </h1>
+  </div>
+  <div class="badge">API Flask · MySQL · Groupe 30</div>
+</header>
+
+<main>
+
+  <!-- Sélecteur de trajet -->
+  <div class="trajet-bar">
+    <label>Trajet</label>
+    <select id="trajet-select">
+      <option value="1">Trajet #1 — Nouakchott → Nouadhibou · 10 Mai 2026 · Matin</option>
+    </select>
+    <button class="btn-refresh" onclick="chargerDisponibilites()">↻ Actualiser</button>
+  </div>
+
+  <!-- Infos trajet -->
+  <div class="trajet-info" id="trajet-info">
+    <div class="info-chip">
+      <div class="label">Date</div>
+      <div class="value" id="info-date">—</div>
+    </div>
+    <div class="info-chip">
+      <div class="label">Prix</div>
+      <div class="value" id="info-prix">—</div>
+    </div>
+    <div class="info-chip">
+      <div class="label">Période</div>
+      <div class="value" id="info-periode">—</div>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats">
+    <div class="stat-card libre">
+      <div class="stat-label">Places libres</div>
+      <div class="stat-value" id="stat-libres">—</div>
+    </div>
+    <div class="stat-card bloquee">
+      <div class="stat-label">Bloquées</div>
+      <div class="stat-value" id="stat-bloquees">—</div>
+    </div>
+    <div class="stat-card confirmee">
+      <div class="stat-label">Confirmées</div>
+      <div class="stat-value" id="stat-confirmees">—</div>
+    </div>
+    <div class="stat-card total">
+      <div class="stat-label">Total places</div>
+      <div class="stat-value" id="stat-total">—</div>
+    </div>
+  </div>
+
+  <!-- Grille de places -->
+  <div class="bus-section">
+    <div class="section-title">Plan du bus</div>
+
+    <div class="bus-wrapper">
+      <div class="bus-front">🚗 CONDUCTEUR</div>
+      <div class="seats-grid" id="seats-grid">
+        <div style="text-align:center;color:var(--muted);grid-column:1/-1;padding:2rem">
+          <div class="spinner"></div>
+          <p style="margin-top:1rem;font-size:0.85rem">Chargement des places...</p>
+        </div>
+      </div>
+      <div class="legend">
+        <div class="legend-item">
+          <div class="legend-dot" style="background:var(--libre)"></div>
+          Libre (cliquer pour réserver)
+        </div>
+        <div class="legend-item">
+          <div class="legend-dot" style="background:var(--bloquee)"></div>
+          Bloquée (en attente de paiement)
+        </div>
+        <div class="legend-item">
+          <div class="legend-dot" style="background:var(--confirmee)"></div>
+          Confirmée (vendue)
+        </div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<!-- Modal réservation -->
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <h2>🪑 Réserver la place <span id="modal-place-num"></span></h2>
+    <p>Remplissez vos informations. La place sera bloquée 5 minutes le temps du paiement.</p>
+
+    <div class="modal-field">
+      <label>ID Client</label>
+      <input type="number" id="input-client" value="1" min="1" placeholder="ID du client">
+    </div>
+
+    <div class="modal-field">
+      <label>Montant (MRU)</label>
+      <input type="number" id="input-montant" placeholder="Ex: 1500">
+    </div>
+
+    <div class="modal-field">
+      <label>Mode de paiement</label>
+      <select id="input-mode">
+        <option value="mobile_money">📱 Mobile Money (Bankily / Masrvi)</option>
+        <option value="especes">💵 Espèces</option>
+        <option value="carte">💳 Carte bancaire</option>
+        <option value="virement">🏦 Virement</option>
+      </select>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="fermerModal()">Annuler</button>
+      <button class="btn-confirm" onclick="confirmerReservation()">
+        ✓ Bloquer & Payer
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+const API = 'http://127.0.0.1:5000/api';
+let selectedPlace = null;
+let intervalId = null;
+
+// ─── Chargement des disponibilités ───────────────────────────────────────────
+async function chargerDisponibilites() {
+  const idTrajet = document.getElementById('trajet-select').value;
+
+  try {
+    const res  = await fetch(`${API}/disponibilites/${idTrajet}`);
+    const data = await res.json();
+
+    if (data.erreur) {
+      afficherToast(data.erreur, 'error');
+      return;
+    }
+
+    // Infos trajet
+    const t = data.trajet;
+    document.getElementById('info-date').textContent    = new Date(t.date_trajet).toLocaleDateString('fr-FR');
+    document.getElementById('info-prix').textContent    = t.prix + ' MRU';
+    document.getElementById('info-periode').textContent = t.periode.charAt(0).toUpperCase() + t.periode.slice(1);
+
+    // Stats
+    const libres     = data.places.filter(p => p.statut_place === 'libre' || p.statut_place === 'expiree').length;
+    const bloquees   = data.places.filter(p => p.statut_place === 'bloquee').length;
+    const confirmees = data.places.filter(p => p.statut_place === 'confirmee').length;
+
+    document.getElementById('stat-libres').textContent    = libres;
+    document.getElementById('stat-bloquees').textContent  = bloquees;
+    document.getElementById('stat-confirmees').textContent = confirmees;
+    document.getElementById('stat-total').textContent     = data.total;
+
+    // Grille
+    afficherGrille(data.places);
+
+    // Prix par défaut dans modal
+    document.getElementById('input-montant').value = t.prix;
+
+  } catch(e) {
+    afficherToast('Impossible de joindre le serveur Flask. Vérifiez que python app.py est lancé.', 'error');
+  }
+}
+
+// ─── Afficher la grille de places ────────────────────────────────────────────
+function afficherGrille(places) {
+  const grid = document.getElementById('seats-grid');
+  grid.innerHTML = '';
+
+  places.forEach((place, i) => {
+    // Ajouter un espace couloir après la 2ème colonne
+    if (i % 4 === 2) {
+      const aisle = document.createElement('div');
+      aisle.className = 'seat aisle';
+      grid.appendChild(aisle);
+    }
+
+    const seat = document.createElement('div');
+    const statut = place.statut_place === 'expiree' ? 'libre' : place.statut_place;
+    seat.className = `seat ${statut}`;
+    seat.dataset.id    = place.id_place;
+    seat.dataset.num   = place.numero_place;
+    seat.dataset.statut = statut;
+
+    let timerHtml = '';
+    if (statut === 'bloquee' && place.secondes_restantes) {
+      const min = Math.floor(place.secondes_restantes / 60);
+      const sec = place.secondes_restantes % 60;
+      timerHtml = `<div class="timer">⏱ ${min}:${sec.toString().padStart(2,'0')}</div>`;
+    }
+
+    seat.innerHTML = `${place.numero_place}${timerHtml}`;
+
+    if (statut === 'libre') {
+      seat.onclick = () => ouvrirModal(place.id_place, place.numero_place);
+    }
+
+    grid.appendChild(seat);
+  });
+}
+
+// ─── Modal ────────────────────────────────────────────────────────────────────
+function ouvrirModal(idPlace, numPlace) {
+  selectedPlace = idPlace;
+  document.getElementById('modal-place-num').textContent = numPlace;
+  document.getElementById('modal').classList.add('active');
+}
+
+function fermerModal() {
+  document.getElementById('modal').classList.remove('active');
+  selectedPlace = null;
+}
+
+async function confirmerReservation() {
+  const idClient  = parseInt(document.getElementById('input-client').value);
+  const montant   = parseFloat(document.getElementById('input-montant').value);
+  const mode      = document.getElementById('input-mode').value;
+  const idTrajet  = parseInt(document.getElementById('trajet-select').value);
+
+  if (!idClient || !montant || !mode) {
+    afficherToast('Remplissez tous les champs', 'error');
+    return;
+  }
+
+  const btn = document.querySelector('.btn-confirm');
+  btn.innerHTML = '<span class="spinner"></span>';
+  btn.disabled = true;
+
+  try {
+    // ÉTAPE 1 : Bloquer seulement
+    const resBloc = await fetch(`${API}/reservations/bloquer`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id_client: idClient, id_place: selectedPlace, id_trajet: idTrajet })
+    });
+    const dataBloc = await resBloc.json();
+
+    if (!resBloc.ok) {
+      afficherToast('❌ ' + dataBloc.erreur, 'error');
+      btn.innerHTML = '✓ Bloquer & Payer';
+      btn.disabled = false;
+      return;
+    }
+
+    // Fermer modal → place apparaît JAUNE (bloquée)
+    afficherToast('⏳ Place bloquée ! Paiement en cours...', 'success');
+    fermerModal();
+    chargerDisponibilites();
+
+    // ÉTAPE 2 : Payer après 3 secondes
+    setTimeout(async () => {
+      const resPay = await fetch(`${API}/paiements/`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id_client: idClient,
+          id_reservation: dataBloc.id_reservation,
+          montant: montant,
+          mode_paiement: mode
+        })
+      });
+      const dataPay = await resPay.json();
+
+      if (resPay.ok) {
+        afficherToast('✅ Paiement confirmé ! Place réservée.', 'success');
+        chargerDisponibilites();
+      }
+    }, 3000);
+
+  } catch(e) {
+    afficherToast('Erreur de connexion au serveur', 'error');
+  }
+
+  btn.innerHTML = '✓ Bloquer & Payer';
+  btn.disabled = false;
+}
+
+// ─── Toast ────────────────────────────────────────────────────────────────────
+function afficherToast(msg, type) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = `toast ${type} show`;
+  setTimeout(() => t.classList.remove('show'), 4000);
+}
+
+// ─── Init + polling toutes les 10s ────────────────────────────────────────────
+chargerDisponibilites();
+intervalId = setInterval(chargerDisponibilites, 10000);
+
+// Fermer modal en cliquant à l'extérieur
+document.getElementById('modal').addEventListener('click', function(e) {
+  if (e.target === this) fermerModal();
+});
+</script>
+</body>
+</html>
