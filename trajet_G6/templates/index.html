@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Créer un trajet</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500&family=DM+Mono:wght@500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+  <div class="page-header">
+    <div class="breadcrumb">
+      <a href="{{ url_for('liste_trajets') }}">Trajets</a> / Nouveau trajet
+    </div>
+    <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:12px;">
+      <div>
+        <h1>Créer un trajet</h1>
+        <p class="subtitle">Remplissez les informations pour planifier un nouveau trajet</p>
+      </div>
+      <a href="{{ url_for('liste_trajets') }}" class="btn" style="display:inline-flex;align-items:center;gap:7px;text-decoration:none;white-space:nowrap;flex-shrink:0;">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="8" y1="6" x2="2" y2="12"/><line x1="2" y1="12" x2="8" y2="18"/><line x1="2" y1="12" x2="22" y2="12"/>
+        </svg>
+        Voir la liste
+      </a>
+    </div>
+  </div>
+
+  <div class="card">
+    <form id="trajetForm" method="POST" action="/add_trajet">
+
+      <!-- ── Agence & Bus ─────────────────────────── -->
+      <div class="section-title">Agence &amp; Bus</div>
+      <div class="grid-2">
+
+        <div class="field">
+          <label for="id_agence">Agence <span class="required">*</span></label>
+          <div class="input-wrap">
+            <select id="id_agence" name="id_agence" required>
+              <option value="">Sélectionner une agence</option>
+              {% for agence in agences %}
+              <option value="{{ agence[0] }}">{{ agence[1] }}</option>
+              {% endfor %}
+            </select>
+            <span class="select-arrow">&#9662;</span>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="id_bus">Bus <span class="required">*</span></label>
+          <div class="input-wrap">
+            <select id="id_bus" name="id_bus" required>
+              <option value="">Sélectionner un bus</option>
+              {% for b in bus %}
+              <option value="{{ b[0] }}" data-label="{{ b[1] }}" data-places="{{ b[2] }} places">
+                {{ b[1] }} — {{ b[2] }} places
+              </option>
+              {% endfor %}
+            </select>
+            <span class="select-arrow">&#9662;</span>
+          </div>
+          <div class="bus-preview" id="busPreview">
+            <span class="bus-preview-text" id="busLabel"></span>
+            <span class="badge" id="busPlaces"></span>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- ── Itinéraire ───────────────────────────── -->
+      <div class="section-title">Itinéraire</div>
+      <div class="grid-2">
+
+        <div class="field">
+          <label for="id_ville_depart">Ville de départ <span class="required">*</span></label>
+          <div class="input-wrap">
+            <select id="id_ville_depart" name="id_ville_depart" required>
+              <option value="">Choisir une ville</option>
+              {% for ville in villes %}
+              <option value="{{ ville[0] }}">{{ ville[1] }}</option>
+              {% endfor %}
+            </select>
+            <span class="select-arrow">&#9662;</span>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="id_ville_arrivee">Ville d'arrivée <span class="required">*</span></label>
+          <div class="input-wrap">
+            <select id="id_ville_arrivee" name="id_ville_arrivee" required>
+              <option value="">Choisir une ville</option>
+              {% for ville in villes %}
+              <option value="{{ ville[0] }}">{{ ville[1] }}</option>
+              {% endfor %}
+            </select>
+            <span class="select-arrow">&#9662;</span>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="route-visual">
+        <div class="city-pill" id="cityDep">—</div>
+        <div class="arrow-line"></div>
+        <div class="city-pill" id="cityArr">—</div>
+      </div>
+
+      <!-- ── Footer ────────────────────────────────── -->
+      <div class="form-footer">
+        <a href="{{ url_for('liste_trajets') }}" class="btn" style="display:inline-flex;align-items:center;gap:6px;text-decoration:none;">
+          Annuler
+        </a>
+        <button type="submit" class="btn btn-primary" style="display:inline-flex;align-items:center;gap:7px;">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="20 6 9 17 4 12"/>
+          </svg>
+          Créer le trajet
+        </button>
+      </div>
+
+    </form>
+  </div>
+
+  <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>

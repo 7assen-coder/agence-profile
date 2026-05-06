@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Liste des trajets</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500&family=DM+Mono:wght@500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <style>
+    /* ── Override card & page width for table page ── */
+    .page-header,
+    .card {
+      max-width: 1100px;
+    }
+
+    /* ── Table trajets ─────────────────────────── */
+    .table-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+
+    .count-badge {
+      font-size: 11px;
+      font-weight: 500;
+      padding: 3px 10px;
+      border-radius: 20px;
+      background: var(--accent-light);
+      color: var(--accent);
+    }
+
+    /* Wrapper scrollable si écran très étroit */
+    .table-wrap {
+      overflow-x: auto;
+    }
+
+    .trajets-table {
+      width: 100%;
+      min-width: 860px;
+      border-collapse: collapse;
+      table-layout: fixed;
+    }
+
+    /* Largeurs fixes par colonne pour alignement parfait */
+    .trajets-table col.col-route   { width: 240px; }
+    .trajets-table col.col-date    { width: 120px; }
+    .trajets-table col.col-periode { width: 110px; }
+    .trajets-table col.col-horaire { width: 150px; }
+    .trajets-table col.col-bus     { width: 130px; }
+    .trajets-table col.col-agence  { width: 160px; }
+    .trajets-table col.col-prix    { width: 110px; }
+
+    .trajets-table thead tr {
+      border-bottom: 0.5px solid var(--border);
+    }
+
+    /* th et td : même padding pour alignement parfait */
+    .trajets-table th,
+    .trajets-table td {
+      padding: 12px 14px;
+      text-align: left;
+      vertical-align: middle;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .trajets-table th {
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--text-hint);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      padding-top: 0;
+    }
+
+    .trajets-table td {
+      font-size: 13px;
+      color: var(--text-primary);
+    }
+
+    .trajets-table tbody tr {
+      border-bottom: 0.5px solid var(--border);
+      transition: background 0.1s;
+    }
+
+    .trajets-table tbody tr:last-child {
+      border-bottom: none;
+    }
+
+    .trajets-table tbody tr:hover {
+      background: #fafaf8;
+    }
+
+    /* ── Cellule route ──────────────────────────── */
+    .route-cell {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .city-name {
+      font-weight: 500;
+    }
+
+    .route-arrow {
+      display: flex;
+      align-items: center;
+      color: var(--text-hint);
+      flex-shrink: 0;
+    }
+
+    /* ── Cellule agence ─────────────────────────── */
+    .agence-cell {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .agence-dot {
+      width: 26px;
+      height: 26px;
+      border-radius: 6px;
+      background: var(--accent-light);
+      color: var(--accent);
+      font-size: 10px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    /* ── Cellule heure ──────────────────────────── */
+    .time-cell {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--text-secondary);
+    }
+
+    .time-cell svg {
+      color: var(--text-hint);
+      flex-shrink: 0;
+    }
+
+    .time-val {
+      font-family: 'DM Mono', monospace;
+      font-size: 12px;
+    }
+
+    /* ── Cellule prix ───────────────────────────── */
+    .prix-cell {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .prix-val {
+      font-family: 'DM Mono', monospace;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-primary);
+    }
+
+    .prix-cur {
+      font-size: 11px;
+      color: var(--text-hint);
+    }
+
+    /* ── Badge période ──────────────────────────── */
+    .periode-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 11px;
+      font-weight: 500;
+      padding: 3px 9px;
+      border-radius: 20px;
+    }
+
+    .periode-badge.matin {
+      background: #fef9ec;
+      color: #b45309;
+      border: 0.5px solid #fde68a;
+    }
+
+    .periode-badge.soir {
+      background: #eff6ff;
+      color: #1d4ed8;
+      border: 0.5px solid #bfdbfe;
+    }
+
+    .periode-badge.nuit {
+      background: #f5f3ff;
+      color: #6d28d9;
+      border: 0.5px solid #ddd6fe;
+    }
+
+    .periode-badge svg {
+      flex-shrink: 0;
+    }
+
+    /* ── Bus cell ───────────────────────────────── */
+    .bus-cell {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--text-secondary);
+    }
+
+    .bus-cell svg { color: var(--text-hint); flex-shrink: 0; }
+
+    /* ── Empty state ────────────────────────────── */
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--text-hint);
+    }
+
+    .empty-icon {
+      width: 48px;
+      height: 48px;
+      margin: 0 auto 12px;
+      color: #d4d2ca;
+    }
+
+    .empty-state p {
+      font-size: 14px;
+      color: var(--text-secondary);
+      margin-bottom: 4px;
+    }
+
+    .empty-state span {
+      font-size: 12px;
+      color: var(--text-hint);
+    }
+
+    /* ── Action button in nav ───────────────────── */
+    .page-header-row {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .page-header-row .page-header-text h1 { margin-bottom: 4px; }
+  </style>
+</head>
+<body>
+
+  <div class="page-header">
+    <div class="breadcrumb">
+      <a href="#">Trajets</a> / Liste
+    </div>
+    <div class="page-header-row">
+      <div class="page-header-text">
+        <h1>Liste des trajets</h1>
+        <p class="subtitle">Consultez et gérez tous les trajets enregistrés</p>
+      </div>
+      <a href="{{ url_for('add_trajet') }}" class="btn btn-primary" style="display:inline-flex;align-items:center;gap:7px;text-decoration:none;white-space:nowrap;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+        </svg>
+        Nouveau trajet
+      </a>
+    </div>
+  </div>
+
+  <div class="card">
+
+    <div class="table-header">
+      <div class="section-title" style="margin-bottom:0;padding-bottom:0;border-bottom:none;">Tous les trajets</div>
+      <span class="count-badge">{{ trajets|length }} trajet{% if trajets|length != 1 %}s{% endif %}</span>
+    </div>
+
+    <div style="border-top: 0.5px solid var(--border); margin-bottom: 4px;"></div>
+
+    {% if trajets %}
+    <div class="table-wrap">
+    <table class="trajets-table">
+      <colgroup>
+        <col class="col-route">
+        <col class="col-date">
+        <col class="col-periode">
+        <col class="col-horaire">
+        <col class="col-bus">
+        <col class="col-agence">
+        <col class="col-prix">
+      </colgroup>
+      <thead>
+        <tr>
+          <th>
+            <span style="display:inline-flex;align-items:center;gap:5px;">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              Route
+            </span>
+          </th>
+          <th>
+            <span style="display:inline-flex;align-items:center;gap:5px;">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+              Date
+            </span>
+          </th>
+          <th>Période</th>
+          <th>
+            <span style="display:inline-flex;align-items:center;gap:5px;">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              Horaire
+            </span>
+          </th>
+          <th>
+            <span style="display:inline-flex;align-items:center;gap:5px;">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13" rx="2"/><path d="M16 8h4l3 4v4h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+              Bus
+            </span>
+          </th>
+          <th>
+            <span style="display:inline-flex;align-items:center;gap:5px;">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+              Agence
+            </span>
+          </th>
+          <th>Prix</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for t in trajets %}
+        <tr>
+
+          <!-- Route -->
+          <td>
+            <div class="route-cell">
+              <span class="city-name">{{ t.ville_depart }}</span>
+              <span class="route-arrow">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="5" y1="12" x2="19" y2="12"/><polyline points="13 6 19 12 13 18"/>
+                </svg>
+              </span>
+              <span class="city-name">{{ t.ville_arrivee }}</span>
+            </div>
+          </td>
+
+          <!-- Date -->
+          <td>
+            <div style="display:flex;align-items:center;gap:6px;color:var(--text-secondary);">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--text-hint);">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+              </svg>
+              <span style="font-size:12px;">{{ t.date_trajet }}</span>
+            </div>
+          </td>
+
+          <!-- Période -->
+          <td>
+            {% if t.periode == 'matin' %}
+            <span class="periode-badge matin">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+              Matin
+            </span>
+            {% elif t.periode == 'soir' %}
+            <span class="periode-badge soir">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+              Soir
+            </span>
+            {% else %}
+            <span class="periode-badge nuit">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+              {{ t.periode|capitalize }}
+            </span>
+            {% endif %}
+          </td>
+
+          <!-- Horaire -->
+          <td>
+            <div class="time-cell">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+              </svg>
+              <span class="time-val">{{ t.heure_depart }}</span>
+              <span style="color:var(--text-hint);font-size:11px;">→</span>
+              <span class="time-val">{{ t.heure_arrivee }}</span>
+            </div>
+          </td>
+
+          <!-- Bus -->
+          <td>
+            <div class="bus-cell">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="1" y="3" width="15" height="13" rx="2"/><path d="M16 8h4l3 4v4h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/>
+              </svg>
+              <span>{{ t.bus_label }}</span>
+            </div>
+          </td>
+
+          <!-- Agence -->
+          <td>
+            <div class="agence-cell">
+              <div class="agence-dot">{{ t.agence_nom[:2]|upper }}</div>
+              <span>{{ t.agence_nom }}</span>
+            </div>
+          </td>
+
+          <!-- Prix -->
+          <td>
+            <div class="prix-cell">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="color:var(--text-hint);">
+                <line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+              </svg>
+              <span class="prix-val">{{ t.prix }}</span>
+              <span class="prix-cur">MRU</span>
+            </div>
+          </td>
+
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    </div>
+
+    {% else %}
+    <div class="empty-state">
+      <svg class="empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="1" y="3" width="15" height="13" rx="2"/><path d="M16 8h4l3 4v4h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/>
+      </svg>
+      <p>Aucun trajet enregistré</p>
+      <span>Créez votre premier trajet pour commencer</span>
+      <div style="margin-top:16px;">
+        <a href="{{ url_for('add_trajet') }}" class="btn btn-primary" style="display:inline-flex;align-items:center;gap:7px;text-decoration:none;">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+          </svg>
+          Créer un trajet
+        </a>
+      </div>
+    </div>
+    {% endif %}
+
+  </div>
+
+</body>
+</html>

@@ -1,0 +1,406 @@
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --bg: #f4f3ef;
+  --surface: #ffffff;
+  --border: #e2e0d8;
+  --border-focus: #1a3c5e;
+  --text-primary: #1a1a18;
+  --text-secondary: #6b6b65;
+  --text-hint: #a8a8a2;
+  --accent: #1a3c5e;
+  --accent-light: rgba(26, 60, 94, 0.08);
+  --accent-hover: #163251;
+  --danger: #c0392b;
+  --radius-sm: 8px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+}
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text-primary);
+  min-height: 100vh;
+  padding: 40px 20px;
+}
+
+/* ── En-tête ────────────────────────────────── */
+
+.page-header {
+  max-width: 720px;
+  margin: 0 auto 24px;
+}
+
+.breadcrumb {
+  font-size: 12px;
+  color: var(--text-hint);
+  margin-bottom: 6px;
+}
+
+.breadcrumb a {
+  color: var(--text-secondary);
+  text-decoration: none;
+}
+
+.breadcrumb a:hover {
+  color: var(--accent);
+}
+
+h1 {
+  font-size: 22px;
+  font-weight: 500;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+
+.subtitle {
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+/* ── Carte ──────────────────────────────────── */
+
+.card {
+  background: var(--surface);
+  border: 0.5px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 28px;
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+/* ── Sections ───────────────────────────────── */
+
+.section-title {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  margin-bottom: 16px;
+  padding-bottom: 10px;
+  border-bottom: 0.5px solid var(--border);
+}
+
+.divider {
+  height: 0.5px;
+  background: var(--border);
+  margin: 24px 0;
+}
+
+/* ── Grilles ────────────────────────────────── */
+
+.grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.grid-3 {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+/* ── Champs ─────────────────────────────────── */
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+label {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.required {
+  color: var(--danger);
+}
+
+.hint {
+  font-size: 11px;
+  color: var(--text-hint);
+  margin-top: 2px;
+}
+
+/* ── Inputs ─────────────────────────────────── */
+
+.input-wrap {
+  position: relative;
+}
+
+select,
+input[type="date"],
+input[type="time"],
+input[type="number"] {
+  width: 100%;
+  height: 38px;
+  padding: 0 12px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  color: var(--text-primary);
+  background: var(--surface);
+  border: 0.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  outline: none;
+  appearance: none;
+  -webkit-appearance: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+select:hover,
+input:hover {
+  border-color: #c4c2ba;
+}
+
+select:focus,
+input:focus {
+  border-color: var(--border-focus);
+  box-shadow: 0 0 0 3px rgba(26, 60, 94, 0.1);
+}
+
+.select-arrow {
+  position: absolute;
+  right: 11px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  color: var(--text-hint);
+  font-size: 11px;
+}
+
+/* ── Agence connectée ───────────────────────── */
+
+.agence-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  background: #f8f7f3;
+  border: 0.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  margin-bottom: 4px;
+}
+
+.agence-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  background: var(--accent-light);
+  color: var(--accent);
+  font-size: 13px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.agence-nom {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.agence-hint {
+  font-size: 11px;
+  color: var(--text-hint);
+  margin-top: 2px;
+}
+
+/* ── Aperçu bus ─────────────────────────────── */
+
+.bus-preview {
+  display: none;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 8px;
+  padding: 9px 12px;
+  background: #f8f7f3;
+  border: 0.5px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+
+.bus-preview.visible {
+  display: flex;
+}
+
+.bus-preview-text {
+  font-size: 12px;
+  color: var(--text-secondary);
+  font-family: 'DM Mono', monospace;
+}
+
+.badge {
+  font-size: 11px;
+  font-weight: 500;
+  padding: 3px 10px;
+  border-radius: 20px;
+  background: var(--accent-light);
+  color: var(--accent);
+}
+
+/* ── Visualisation route ────────────────────── */
+
+.route-visual {
+  display: flex;
+  align-items: center;
+  margin-top: 10px;
+  padding: 12px 16px;
+  background: #f8f7f3;
+  border: 0.5px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+
+.city-pill {
+  font-size: 13px;
+  font-weight: 500;
+  padding: 5px 14px;
+  background: var(--surface);
+  border: 0.5px solid var(--border);
+  border-radius: 20px;
+  white-space: nowrap;
+  color: var(--text-primary);
+}
+
+.arrow-line {
+  flex: 1;
+  height: 1px;
+  background: #d0cec6;
+  position: relative;
+  margin: 0 10px;
+}
+
+.arrow-line::after {
+  content: '';
+  position: absolute;
+  right: -1px;
+  top: -4px;
+  border-left: 7px solid #d0cec6;
+  border-top: 4px solid transparent;
+  border-bottom: 4px solid transparent;
+}
+
+/* ── Période ────────────────────────────────── */
+
+.periode-group {
+  display: flex;
+  gap: 8px;
+  margin-top: 2px;
+}
+
+.periode-btn {
+  flex: 1;
+  height: 38px;
+  border: 0.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  cursor: pointer;
+  background: var(--surface);
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  transition: border-color 0.15s, background 0.15s, color 0.15s;
+}
+
+.periode-btn svg {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+}
+
+.periode-btn:hover {
+  border-color: var(--border-focus);
+  color: var(--accent);
+}
+
+.periode-btn.active {
+  border-color: var(--accent);
+  background: var(--accent-light);
+  color: var(--accent);
+  font-weight: 500;
+}
+
+/* ── Prix ───────────────────────────────────── */
+
+.price-prefix {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-hint);
+  font-family: 'DM Mono', monospace;
+  pointer-events: none;
+}
+
+.price-input {
+  padding-left: 48px !important;
+}
+
+/* ── Footer ─────────────────────────────────── */
+
+.form-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 24px;
+}
+
+.btn {
+  height: 38px;
+  padding: 0 20px;
+  border-radius: var(--radius-sm);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  border: 0.5px solid var(--border);
+  background: var(--surface);
+  color: var(--text-secondary);
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.btn:hover {
+  background: #f4f3ef;
+  border-color: #c4c2ba;
+}
+
+.btn-primary {
+  background: var(--accent);
+  color: #ffffff;
+  border-color: var(--accent);
+}
+
+.btn-primary:hover {
+  background: var(--accent-hover);
+  border-color: var(--accent-hover);
+}
+
+/* ── Responsive ─────────────────────────────── */
+
+@media (max-width: 580px) {
+  .grid-2,
+  .grid-3 {
+    grid-template-columns: 1fr;
+  }
+
+  .card {
+    padding: 20px;
+  }
+}
