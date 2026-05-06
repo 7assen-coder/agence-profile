@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ titre }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<div class="container">
+    <nav>
+        <a href="/">🏠 Accueil</a> 
+        <a href="/login">👤 Espace Client</a> 
+        <a href="/login-agence">🏢 Vue Agence</a>
+    </nav>
+
+    <h1>{{ titre }}</h1>
+
+    <table>
+    <thead>
+        <tr>
+            <th>Passager</th>
+            <th>Trajet</th>
+            <th>Date</th>
+            <th>Prix</th>
+            <th>Statut</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for r in res %}
+        <tr>
+            <td>{{ r.passager }}</td>
+            <td>{{ r.depart }} ➔ {{ r.arrivee }}</td>
+            <td>{{ r.date_trajet }}</td>
+            <td>{{ r.prix }} MRU</td>
+            <td>
+                <span class="status-badge {{ r.statut }}">
+                    {{ r.statut }}
+                </span>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+        
+
+</div>
+
+</body>
+</html>

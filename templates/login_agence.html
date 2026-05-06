@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connexion Agence - MauriBus</title>
+    <style>
+        /* --- DESIGN GLOBAL --- */
+        :root {
+            --primary: #2c3e50;
+            --secondary: #3498db;
+            --bg-gray: #f0f2f5;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-gray);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        /* --- CARTE DE CONNEXION --- */
+        .login-card {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        .login-card h1 {
+            color: var(--primary);
+            margin-bottom: 10px;
+            font-size: 1.8rem;
+        }
+
+        .login-card p {
+            color: #718096;
+            margin-bottom: 30px;
+            font-size: 0.95rem;
+        }
+
+        /* --- FORMULAIRE --- */
+        .form-group {
+            text-align: left;
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            color: #4a5568;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 14px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 1rem;
+            box-sizing: border-box; /* Important pour que le padding ne dépasse pas */
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus {
+            border-color: var(--secondary);
+            outline: none;
+            box-shadow: 0 0 0 4px rgba(52, 152, 219, 0.1);
+        }
+
+        /* --- BOUTON --- */
+        .btn-login {
+            width: 100%;
+            background: linear-gradient(135deg, var(--secondary), #2980b9);
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-top: 10px;
+        }
+
+        .btn-login:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 15px rgba(52, 152, 219, 0.3);
+        }
+
+        .btn-login:active {
+            transform: translateY(0);
+        }
+
+        /* --- LIEN RETOUR --- */
+        .back-link {
+            display: inline-block;
+            margin-top: 25px;
+            color: var(--secondary);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+
+        /* Petit logo icône */
+        .icon-circle {
+            background: #ebf8ff;
+            width: 70px;
+            height: 70px;
+            line-height: 70px;
+            border-radius: 50%;
+            margin: 0 auto 20px;
+            font-size: 2rem;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="login-card">
+        <div class="icon-circle">🏢</div>
+        <h1>Espace Agence</h1>
+        <p>Veuillez entrer votre identifiant pour accéder à l'historique des réservations.</p>
+
+        <form action="/login_agence_check" method="POST">
+            <div class="form-group">
+                <label for="id_agence">Identifiant Agence</label>
+                <input type="number" name="id_agence" id="id_agence" placeholder="Ex: 1" required>
+            </div>
+
+            <button type="submit" class="btn-login">
+                Se connecter
+            </button>
+        </form>
+
+        <a href="/" class="back-link">← Retour à l'accueil</a>
+    </div>
+
+</body>
+</html>

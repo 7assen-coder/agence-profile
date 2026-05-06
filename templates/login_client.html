@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <title>Connexion Client</title>
+</head>
+<body>
+    <div class="container" style="max-width: 400px; margin-top: 100px; text-align: center;">
+        <h1>Accès Voyageur</h1>
+        <p>Veuillez saisir votre identifiant client pour voir votre historique :</p>
+        
+        <form action="/login_check" method="POST">
+            <input type="number" name="id_client" placeholder="Ex: 1" required 
+                   style="width: 80%; padding: 10px; margin-bottom: 20px; border-radius: 5px; border: 1px solid #ccc;">
+            <button type="submit" style="background-color: #3498db; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer;">
+                Afficher mon historique
+            </button>
+        </form>
+        
+        <br>
+        <a href="/" style="color: #7f8c8d; text-decoration: none; font-size: 0.9em;">⬅ Retour à l'accueil</a>
+    </div>
+</body>
+</html>
