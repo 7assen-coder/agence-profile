@@ -12,7 +12,7 @@ class Config:
     MYSQL_PORT = os.getenv("MYSQL_PORT", "3306")
     MYSQL_USER = os.getenv("MYSQL_USER", "root")
     MYSQL_PASSWORD = os.getenv("MYSQL_PASSWORD", "")
-    MYSQL_DB = os.getenv("MYSQL_DB", "trajets_saas")
+    MYSQL_DB = os.getenv("MYSQL_DB", "transport_reservation")
 
     _mysql_uri = (
         f"mysql+pymysql://{MYSQL_USER}:{MYSQL_PASSWORD}"
@@ -23,6 +23,15 @@ class Config:
 
     JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY", "jwt-dev-secret")
     JWT_ACCESS_TOKEN_EXPIRES = timedelta(hours=12)
+
+    SESSION_COOKIE_SECURE = os.getenv("SESSION_COOKIE_SECURE", "").lower() in (
+        "1",
+        "true",
+        "yes",
+    )
+    SESSION_COOKIE_HTTPONLY = True
+    SESSION_COOKIE_SAMESITE = os.getenv("SESSION_COOKIE_SAMESITE", "Lax")
+    PERMANENT_SESSION_LIFETIME = timedelta(hours=12)
 
     UPLOAD_FOLDER = os.getenv("UPLOAD_FOLDER", "uploads/logos")
     MAX_CONTENT_LENGTH = int(os.getenv("MAX_CONTENT_MB", "2")) * 1024 * 1024

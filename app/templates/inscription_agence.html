@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+{% block title %}Inscription — Agence{% endblock %}
+{% block content %}
+<div class="page-narrow py-page">
+  <div class="width-register">
+    <div class="glass">
+      <p class="muted-small"><a class="inline-link" href="{{ url_for('web.home') }}">← Accueil</a></p>
+      <h1 class="h1-form">Inscription agence</h1>
+      <p class="muted-small">Déjà inscrit ? <a class="inline-link" href="{{ url_for('web.connexion_role', role='agence') }}">Connexion</a></p>
+      {% set o = old or {} %}
+      <form class="stack-form mt-form" method="post" action="{{ url_for('web.inscription_role', role='agence') }}">
+        <div class="field">
+          <label for="nom">Nom de l’agence</label>
+          <input id="nom" name="nom" required minlength="2" maxlength="100" value="{{ o.nom or '' }}"
+            pattern="^[A-Za-zÀ-ÿ0-9\s'\-&.]{2,100}$" title="2 à 100 caractères"/>
+        </div>
+        <div class="field">
+          <label for="email">Email</label>
+          <input id="email" name="email" type="email" required value="{{ o.email or '' }}"
+            pattern="{{ pattern_email }}"
+            title="Messagerie reconnue / extension .com, .fr, .ma…"/>
+        </div>
+        <div class="field">
+          <label for="password">Mot de passe</label>
+          <input id="password" name="password" type="password" required minlength="8" maxlength="128"
+            pattern="^.{8,128}$"/>
+        </div>
+        <div class="field">
+          <label for="telephone">Téléphone</label>
+          <input id="telephone" name="telephone" value="{{ o.telephone or '' }}" inputmode="numeric" maxlength="8"
+            pattern="{{ pattern_phone_mobile }}"
+            title="8 chiffres, premier chiffre 2, 3 ou 4"/>
+        </div>
+        <div class="field">
+          <label for="adresse">Adresse</label>
+          <input id="adresse" name="adresse" value="{{ o.adresse or '' }}" maxlength="200"/>
+        </div>
+        <div class="field">
+          <label for="ville">Ville</label>
+          <input id="ville" name="ville" maxlength="80" value="{{ o.ville or '' }}"/>
+        </div>
+        <div class="field">
+          <label for="description">Description</label>
+          <textarea id="description" name="description" rows="3" maxlength="5000">{{ o.description or '' }}</textarea>
+        </div>
+        <button class="btn btn-primary btn-full" type="submit">Demander un compte agence</button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

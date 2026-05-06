@@ -4,7 +4,7 @@ from flask_jwt_extended import create_access_token
 from sqlalchemy.exc import IntegrityError
 
 from ..extensions import db
-from ..models.agence import Agence
+from ..models import Administrateur, Agence
 from ..schemas.agence_schema import RegisterSchema, LoginSchema
 
 auth_bp = Blueprint("auth", __name__)
@@ -28,7 +28,6 @@ def register():
         ville=data.get("ville"),
         description=data.get("description"),
         statut="en_attente",
-        role="agence",
     )
     agence.set_password(data["password"])
 
@@ -55,6 +54,23 @@ def login():
     except ValidationError as err:
         return jsonify(error="validation_error", details=err.messages), 400
 
+    body = request.get_json() or {}
+    account_type = (body.get("account_type") or "agence").lower().strip()
+
+    if account_type == "admin":
+        adm = Administrateur.query.filter_by(email=data["email"]).first()
+        if not adm or not adm.check_password(data["password"]):
+            return jsonify(error="identifiants_invalides"), 401
+        token = create_access_token(
+            identity=f"admin:{adm.id}",
+            additional_claims={"role": "admin", "email": adm.email},
+        )
+        return jsonify(
+            access_token=token,
+            token_type="Bearer",
+            admin={"id": adm.id, "email": adm.email, "nom": adm.nom},
+        )
+
     agence = Agence.query.filter_by(email=data["email"]).first()
     if not agence or not agence.check_password(data["password"]):
         return jsonify(error="identifiants_invalides"), 401
@@ -63,8 +79,8 @@ def login():
         return jsonify(error="compte_suspendu"), 403
 
     token = create_access_token(
-        identity=str(agence.id),
-        additional_claims={"role": agence.role, "email": agence.email},
+        identity=f"agence:{agence.id}",
+        additional_claims={"role": "agence", "email": agence.email},
     )
     return jsonify(
         access_token=token,

@@ -29,26 +29,44 @@ Chaque module expose une **API REST JSON** et partage la même base MySQL.
 - **Flask-CORS** (autoriser les autres modules)
 - **Werkzeug** (hash des mots de passe)
 - **pytest** (tests)
-- **React (Vite + TypeScript + Tailwind CSS)** — interface dans `frontend/`
+- **Jinja2** + HTML/CSS (sans JavaScript frontend) dans `app/templates/` et `app/static/css/` ; navigation et formulaires côté serveur (sessions signées)
 
-## Démarrage rapide (API + interface)
+## Démarrage rapide (API + site web)
 
-Prérequis : **Node.js** (npm), **Python 3** avec dépendances installées (`pip install -r requirements.txt` dans un venv recommandé).
+Prérequis : **Python 3** avec dépendances installées (`pip install -r requirements.txt` dans un venv).
 
 À la racine du dépôt :
 
 ```bash
-npm install
+npm install   # ou : bash scripts/dev.sh directement si vous préférez uniquement Python
 npm run dev
 ```
 
-Cela lance **Flask** (`python run.py`, port **`5001` par défaut**) et **Vite** (port **`5174`** par défaut dans `vite.config.ts`, ou le suivant si occupé). Ouvre l’URL affichée par Vite (ex. `http://localhost:5174`) : le proxy envoie `/api` vers le backend.
+Cela initialise la base SQLite (sans `.env`) dans **`instance/transport.db`**, injecte les **comptes de démonstration** (voir ci-dessous), puis lance **Flask** sur **http://127.0.0.1:5001** (`run.py`). Pages : hub `/` (connexion / inscription par rôle), `/espace/client`, `/espace/agence`, `/espace/admin`, annuaire `/agences`, JSON `/api/*`.
 
-Sans fichier `.env`, la base utilisée est **SQLite** dans `instance/agence.db`. Avec un `.env` (copie de `.env.example`), la configuration MySQL du fichier est utilisée.
+### Comptes de démonstration (seed automatique)
 
-**Ports :** le port API par défaut est **5001** (évite le conflit macOS / **AirPlay** sur **5000**). Pour forcer un autre port : `export FLASK_PORT=5000` puis `python run.py`, et mets le même dans `frontend/.env` : `VITE_PROXY_TARGET=http://127.0.0.1:5000`.
+Après `bash scripts/dev.sh`, vous pouvez vous connecter sur le site :
 
-**API seule** (sans Vite) : `source venv/bin/activate && python run.py`.
+| Rôle | Email | Mot de passe |
+|------|--------|----------------|
+| Client | `client.demo@transport.ma` | `ClientDemo2026!` |
+| Agence | `agence.demo@transport.ma` | `AgenceDemo2026!` |
+| Admin | `admin@transport.ma` | `AdminDemo2026!` |
+
+L’admin n’a **pas** de formulaire d’inscription publique ; le compte est créé par le seed. Les JWT API agence utilisent désormais un identifiant `agence:<id>` ; login admin JSON : `{ "email", "password", "account_type": "admin" }`.
+
+Sinon uniquement avec Python :
+
+```bash
+bash scripts/dev.sh
+# ou après create_all une fois :
+python run.py
+```
+
+**Sans npm** :
+
+`source venv/bin/activate && python run.py`
 
 **Rechargement auto Flask** : par défaut désactivé (un seul processus, moins de bruit dans le terminal). Pour le réactiver : `export FLASK_RELOADER=1` puis `python run.py`.
 
@@ -58,18 +76,21 @@ Sans fichier `.env`, la base utilisée est **SQLite** dans `instance/agence.db`.
 
 ```
 agence-profile/
-├── frontend/                # UI React (Vite)
 ├── scripts/
-│   └── dev.sh               # Flask + Vite (npm run dev)
-├── package.json             # workspaces npm + script dev
+│   └── dev.sh               # Initialise SQLite puis Flask
+├── package.json             # npm run dev (optionnel → dev.sh)
 ├── app/
+│   ├── static/css/main.css  # Styles
+│   ├── templates/          # Pages HTML (Jinja)
 │   ├── __init__.py          # App factory
 │   ├── config.py            # Config via .env
 │   ├── extensions.py        # db, migrate, jwt, cors
-│   ├── models/agence.py     # Modèle SQLAlchemy
+│   ├── models/
+│   │   └── domain.py         # Agence, Client, Admin, Villes, Bus, …
 │   ├── routes/
 │   │   ├── auth_routes.py   # /api/auth/*
-│   │   └── agence_routes.py # /api/agences/*
+│   │   ├── agence_routes.py # /api/agences/*
+│   │   └── web_routes.py    # pages HTML (/, /agences, …)
 │   ├── schemas/agence_schema.py  # Marshmallow
 │   └── utils/
 │       ├── auth.py          # Décorateurs JWT/role

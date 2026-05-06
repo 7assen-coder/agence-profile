@@ -3,16 +3,23 @@ from flask_jwt_extended import jwt_required
 from marshmallow import ValidationError
 
 from ..extensions import db
-from ..models.agence import Agence
+from ..models import Agence
 from ..schemas.agence_schema import (
     UpdateProfileSchema,
     ChangePasswordSchema,
     AdminUpdateStatutSchema,
 )
-from ..utils.auth import role_required, current_agence
+from ..utils.auth import current_agence, role_required
+from ..utils.session_auth import json_or_session_required
 from ..utils.validators import allowed_file, save_logo
 
 agence_bp = Blueprint("agences", __name__)
+
+
+@agence_bp.before_request
+def _protect_annuaire_api():
+    if request.endpoint in ("agences.list_agences", "agences.get_agence_public"):
+        return json_or_session_required()
 
 
 @agence_bp.get("/me")
@@ -105,7 +112,7 @@ def delete_me():
     return jsonify(message="compte_supprime")
 
 
-# ---------------- Routes publiques ----------------
+# ---------------- Annuaire (session web ou JWT requis, voir before_request) ----------------
 
 @agence_bp.get("")
 def list_agences():

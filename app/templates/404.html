@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% block title %}Page introuvable — Trajets SaaS{% endblock %}
+{% block content %}
+<div class="page-narrow py-dashboard">
+  <div class="width-form">
+    <div class="glass">
+      <p class="text-error">La page demandée n’existe pas.</p>
+      <p class="mt-block"><a class="inline-link" href="{{ url_for('web.home') }}">Retour à l’accueil</a></p>
+    </div>
+  </div>
+</div>
+{% endblock %}

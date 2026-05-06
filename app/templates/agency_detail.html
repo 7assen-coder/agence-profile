@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% from '_macros.html' import status_badge %}
+{% block title %}{{ agence.nom }} — Trajets SaaS{% endblock %}
+{% block content %}
+<div class="page-wide py-dashboard">
+  <div class="width-detail">
+    <a class="back-link" href="{{ url_for('web.agences_list') }}">← Agences</a>
+    <div class="glass">
+      <div class="detail-row">
+        {% if agence.logo %}
+          <img src="{{ url_for('agences.serve_logo', filename=agence.logo) }}" alt="" width="128" height="128" class="logo-large" loading="lazy"/>
+        {% else %}
+          <span class="logo-large logo-placeholder logo-placeholder--lg" aria-hidden="true">{{ agence.nom[:2]|upper }}</span>
+        {% endif %}
+        <div class="detail-body">
+          <h1 class="detail-title">{{ agence.nom }}</h1>
+          <p class="detail-city">{{ agence.ville or 'Ville non renseignée' }}</p>
+          <div class="mt-sm">{{ status_badge(agence.statut) }}</div>
+          {% if agence.description %}
+            <p class="detail-desc pre-wrap">{{ agence.description }}</p>
+          {% endif %}
+          <p class="detail-foot">Création : {{ agence.date_creation.strftime('%d/%m/%Y') }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -3,14 +3,9 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT"
 
-if [[ ! -x "$ROOT/node_modules/.bin/concurrently" ]]; then
-  echo "Run: npm install"
-  exit 1
-fi
-
 mkdir -p "$ROOT/instance"
 if [[ ! -f "$ROOT/.env" ]]; then
-  export SQLALCHEMY_DATABASE_URI="sqlite:////${ROOT}/instance/agence.db"
+  export SQLALCHEMY_DATABASE_URI="sqlite:////${ROOT}/instance/transport.db"
 fi
 
 PY="python3"
@@ -21,11 +16,11 @@ fi
 "$PY" -c "
 from app import create_app
 from app.extensions import db
+from app.seed import seed_demo_users
 app = create_app()
 with app.app_context():
     db.create_all()
+    seed_demo_users()
 "
 
-exec "$ROOT/node_modules/.bin/concurrently" -k -n api,ui -c cyan,magenta \
-  "cd \"$ROOT\" && exec \"$PY\" \"$ROOT/run.py\"" \
-  "cd \"$ROOT\" && npm run dev -w frontend"
+exec "$PY" "$ROOT/run.py"

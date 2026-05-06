@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+{% from '_macros.html' import status_badge %}
+{% block title %}Administration{% endblock %}
+{% block content %}
+<div class="page-wide py-dashboard">
+  <div class="section-head">
+    <h1 class="page-title">Administration</h1>
+    <p class="page-lead">{{ admin.nom }} · {{ admin.email }}</p>
+  </div>
+  <div class="admin-stats glass">
+    <div class="admin-stat">
+      <span class="admin-stat-val">{{ n_clients }}</span>
+      <span class="admin-stat-lbl">Clients</span>
+    </div>
+    <div class="admin-stat">
+      <span class="admin-stat-val">{{ n_agences }}</span>
+      <span class="admin-stat-lbl">Agences</span>
+    </div>
+  </div>
+  <div class="glass mt-form">
+    <h2 class="h2-panel">Agences — validation statut</h2>
+    <p class="muted-small">Suspendre, réactiver ou laisser en attente après inscription.</p>
+    <div class="admin-table-wrap">
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Nom</th>
+            <th>Email</th>
+            <th>Statut</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for a in agences %}
+          <tr>
+            <td>{{ a.id }}</td>
+            <td>{{ a.nom }}</td>
+            <td>{{ a.email }}</td>
+            <td>{{ status_badge(a.statut) }}</td>
+            <td>
+              <form class="admin-statut-form" method="post" action="{{ url_for('web.espace_admin_statut', aid=a.id) }}">
+                <label class="sr-only" for="statut-{{ a.id }}">Nouveau statut</label>
+                <select id="statut-{{ a.id }}" name="statut" class="admin-select">
+                  <option value="en_attente" {% if a.statut == 'en_attente' %}selected{% endif %}>En attente</option>
+                  <option value="active" {% if a.statut == 'active' %}selected{% endif %}>Active</option>
+                  <option value="suspendue" {% if a.statut == 'suspendue' %}selected{% endif %}>Suspendue</option>
+                </select>
+                <button type="submit" class="btn btn-primary btn-sm">Appliquer</button>
+              </form>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

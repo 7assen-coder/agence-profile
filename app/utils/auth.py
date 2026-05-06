@@ -1,8 +1,20 @@
 from functools import wraps
-from flask import jsonify
-from flask_jwt_extended import get_jwt, verify_jwt_in_request
 
-from ..models.agence import Agence
+from flask import jsonify
+from flask_jwt_extended import get_jwt, get_jwt_identity, verify_jwt_in_request
+
+from ..extensions import db
+from ..models import Agence
+
+
+def _split_identity(raw):
+    if raw is None:
+        return None, None
+    s = str(raw)
+    if ":" not in s:
+        return None, None
+    kind, _, rest = s.partition(":")
+    return kind, rest
 
 
 def role_required(*roles):
@@ -14,13 +26,18 @@ def role_required(*roles):
             if claims.get("role") not in roles:
                 return jsonify(error="forbidden"), 403
             return fn(*args, **kwargs)
+
         return decorator
+
     return wrapper
 
 
 def current_agence():
-    claims = get_jwt()
-    agence_id = claims.get("sub") or claims.get("agence_id")
-    if not agence_id:
+    kind, rest = _split_identity(get_jwt_identity())
+    if kind != "agence":
         return None
-    return Agence.query.get(int(agence_id))
+    try:
+        aid = int(rest)
+    except (TypeError, ValueError):
+        return None
+    return db.session.get(Agence, aid)

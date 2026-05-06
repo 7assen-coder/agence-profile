@@ -1,0 +1,90 @@
+{% extends 'base.html' %}
+{% from '_macros.html' import status_badge %}
+{% block title %}Espace agence{% endblock %}
+{% block content %}
+<div class="page-wide py-dashboard">
+  <div class="section-head">
+    <h1 class="page-title">Espace agence</h1>
+    <p class="page-lead">{{ agence.nom }} · {{ agence.email }}</p>
+  </div>
+  <div class="dash-intro glass">
+    <p><strong>Bus enregistrés</strong> : {{ n_bus }}</p>
+    <p><strong>Trajets</strong> : {{ n_trajets }}</p>
+    <p class="muted-small">La gestion des bus, places et trajets utilisera les tables du schéma transport.</p>
+  </div>
+  <div class="dash-grid">
+    <div class="glass glass-profile">
+      <div class="profile-head">
+        <div>
+          <h2 class="h2-panel">Profil agence</h2>
+          <p class="muted-small">{{ agence.email }}</p>
+        </div>
+        {{ status_badge(agence.statut) }}
+      </div>
+      <form class="profile-form" method="post" action="{{ url_for('web.espace_agence_profil') }}">
+        <div class="field field--full">
+          <label for="nom">Nom</label>
+          <input id="nom" name="nom" required minlength="2" maxlength="100" value="{{ agence.nom }}"
+            pattern="^[A-Za-zÀ-ÿ0-9\s'\-&.]{2,100}$"/>
+        </div>
+        <div class="field">
+          <label for="telephone">Téléphone</label>
+          <input id="telephone" name="telephone" value="{{ agence.telephone or '' }}" inputmode="numeric" maxlength="8"
+            pattern="{{ pattern_phone_mobile }}"
+            title="8 chiffres, début 2, 3 ou 4"/>
+        </div>
+        <div class="field">
+          <label for="ville">Ville (annuaire)</label>
+          <input id="ville" name="ville" maxlength="80" value="{{ agence.ville or '' }}"/>
+        </div>
+        <div class="field field--full">
+          <label for="adresse">Adresse</label>
+          <input id="adresse" name="adresse" maxlength="200" value="{{ agence.adresse or '' }}"/>
+        </div>
+        <div class="field field--full">
+          <label for="description">Description</label>
+          <textarea id="description" name="description" rows="4" maxlength="5000">{{ agence.description or '' }}</textarea>
+        </div>
+        <div class="field field--full">
+          <button class="btn btn-primary" type="submit">Enregistrer le profil</button>
+        </div>
+      </form>
+    </div>
+    <div class="dash-side">
+      <div class="glass">
+        <h2 class="h2-panel">Logo</h2>
+        <p class="muted-small">PNG, JPG, JPEG ou WebP — max 2 Mo.</p>
+        <div class="logo-block">
+          {% if agence.logo %}
+            <img src="{{ url_for('agences.serve_logo', filename=agence.logo) }}" alt="" width="96" height="96" class="logo-account"/>
+          {% else %}
+            <div class="logo-account logo-fallback">Aucun logo</div>
+          {% endif %}
+          <form method="post" action="{{ url_for('web.espace_agence_logo') }}" enctype="multipart/form-data" class="logo-form stack-form">
+            <label class="btn btn-secondary btn-file">
+              Choisir un fichier
+              <input type="file" name="logo" accept="image/png,image/jpeg,image/webp" required/>
+            </label>
+            <button class="btn btn-primary" type="submit">Téléverser le logo</button>
+          </form>
+        </div>
+      </div>
+      <div class="glass">
+        <h2 class="h2-panel">Mot de passe</h2>
+        <form class="stack-form" method="post" action="{{ url_for('web.espace_agence_password') }}">
+          <div class="field">
+            <label for="ancien_password">Ancien mot de passe</label>
+            <input id="ancien_password" name="ancien_password" type="password" required autocomplete="current-password"/>
+          </div>
+          <div class="field">
+            <label for="nouveau_password">Nouveau mot de passe</label>
+            <input id="nouveau_password" name="nouveau_password" type="password" required minlength="8" maxlength="128"
+              pattern="^.{8,128}$" autocomplete="new-password"/>
+          </div>
+          <button class="btn btn-secondary" type="submit">Mettre à jour</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

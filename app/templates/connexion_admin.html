@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% block title %}Connexion — Administrateur{% endblock %}
+{% block content %}
+<div class="page-narrow py-page">
+  <div class="width-form">
+    <div class="glass glass--admin-login">
+      <p class="muted-small"><a class="inline-link" href="{{ url_for('web.home') }}">← Accueil</a></p>
+      <h1 class="h1-form">Connexion administrateur</h1>
+      <p class="muted-small text-warn-admin">Pas d’inscription publique : compte créé par la plateforme.</p>
+      <form class="stack-form mt-form" method="post" action="{{ url_for('web.connexion_role', role='admin') }}">
+        {% if next_param %}<input type="hidden" name="next" value="{{ next_param }}"/>{% endif %}
+        <div class="field">
+          <label for="email">Email</label>
+          <input id="email" name="email" type="email" required autocomplete="username"
+            pattern="{{ pattern_email }}"
+            title="Messagerie reconnue (.com, .fr, .ma…)"/>
+        </div>
+        <div class="field">
+          <label for="password">Mot de passe</label>
+          <input id="password" name="password" type="password" required autocomplete="current-password"
+            pattern="^.{8,128}$" title="8 à 128 caractères" minlength="8" maxlength="128"/>
+        </div>
+        <button class="btn btn-primary btn-full" type="submit">Accéder au tableau de bord</button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+{% block title %}Inscription — Client{% endblock %}
+{% block content %}
+<div class="page-narrow py-page">
+  <div class="width-register">
+    <div class="glass">
+      <p class="muted-small"><a class="inline-link" href="{{ url_for('web.home') }}">← Accueil</a></p>
+      <h1 class="h1-form">Inscription client</h1>
+      <p class="muted-small">Déjà inscrit ? <a class="inline-link" href="{{ url_for('web.connexion_role', role='client') }}">Connexion</a></p>
+      {% set o = old or {} %}
+      <form class="stack-form mt-form" method="post" action="{{ url_for('web.inscription_role', role='client') }}">
+        <div class="field">
+          <label for="nom">Nom</label>
+          <input id="nom" name="nom" required value="{{ o.nom or '' }}"
+            pattern="^[A-Za-zÀ-ÿ\s'\-]{2,100}$" title="Lettres, espaces, tirets — 2 à 100 caractères"/>
+        </div>
+        <div class="field">
+          <label for="prenom">Prénom</label>
+          <input id="prenom" name="prenom" required value="{{ o.prenom or '' }}"
+            pattern="^[A-Za-zÀ-ÿ\s'\-]{2,100}$" title="Lettres, espaces, tirets — 2 à 100 caractères"/>
+        </div>
+        <div class="field">
+          <label for="email">Email</label>
+          <input id="email" name="email" type="email" required value="{{ o.email or '' }}"
+            pattern="{{ pattern_email }}"
+            title="Ex. prenom@gmail.com — messagerie reconnue (.com, .fr, .ma, .mr…)"/>
+        </div>
+        <div class="field">
+          <label for="telephone">Téléphone</label>
+          <input id="telephone" name="telephone" value="{{ o.telephone or '' }}" inputmode="numeric" maxlength="8"
+            pattern="{{ pattern_phone_mobile }}"
+            title="8 chiffres, premier chiffre 2, 3 ou 4"/>
+        </div>
+        <div class="field">
+          <label for="cin">CIN</label>
+          <input id="cin" name="cin" required value="{{ o.cin or '' }}" inputmode="numeric"
+            pattern="{{ pattern_cin }}" minlength="10" maxlength="10"
+            title="10 chiffres exactement"/>
+        </div>
+        <div class="field">
+          <label for="password">Mot de passe</label>
+          <input id="password" name="password" type="password" required
+            pattern="^.{8,128}$" minlength="8" maxlength="128" title="8 à 128 caractères"/>
+        </div>
+        <button class="btn btn-primary btn-full" type="submit">Créer mon compte client</button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

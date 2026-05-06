@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% block title %}Agence introuvable — Trajets SaaS{% endblock %}
+{% block content %}
+<div class="page-narrow py-dashboard">
+  <div class="width-form">
+    <div class="glass">
+      <p class="text-error">Agence introuvable ou non publiée.</p>
+      <a class="inline-link mt-block" href="{{ url_for('web.agences_list') }}">Retour à la liste</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

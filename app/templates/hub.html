@@ -1,0 +1,104 @@
+{% extends 'base.html' %}
+{% block title %}Accueil — Connexion &amp; inscription{% endblock %}
+{% block body_class %} page-hub{% endblock %}
+{% block content %}
+{% set next_param = next_param|default(none, true) %}
+<div class="auth-hub-wrap">
+  <div class="auth-hub-bg" aria-hidden="true"></div>
+  <section class="auth-hub" aria-label="Choisir connexion ou inscription">
+    <input type="radio" name="authview" id="av-login" class="auth-hub-input" checked hidden/>
+    <input type="radio" name="authview" id="av-reg" class="auth-hub-input" hidden/>
+
+    <div class="auth-segment" role="tablist" aria-label="Connexion ou inscription">
+      <div class="auth-segment__track">
+        <label for="av-login" class="auth-segment__btn">Connexion</label>
+        <label for="av-reg" class="auth-segment__btn">Inscription</label>
+      </div>
+    </div>
+
+    <section class="auth-panel auth-panel--login" aria-label="Options de connexion">
+      <header class="hub-intro">
+        <p class="hub-eyebrow">Plateforme réservation</p>
+        <h1 class="hub-title">Bienvenue</h1>
+        <p class="hub-sub">Choisissez votre profil pour accéder à votre espace sécurisé.</p>
+      </header>
+      <div class="hub-grid hub-grid--3">
+        <a class="hub-card hub-card--client" href="{{ url_for('web.connexion_role', role='client', next=next_param or none) }}">
+          <span class="hub-card__icon hub-card__icon--client" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM4 21a8 8 0 0116 0"/></svg>
+          </span>
+          <span class="hub-card__body">
+            <span class="hub-card-kicker">Espace</span>
+            <span class="hub-card-title">Client</span>
+            <span class="hub-card-desc">Réservez vos trajets et suivez vos billets.</span>
+          </span>
+          <span class="hub-card__arrow" aria-hidden="true">→</span>
+        </a>
+        <a class="hub-card hub-card--agence" href="{{ url_for('web.connexion_role', role='agence', next=next_param or none) }}">
+          <span class="hub-card__icon hub-card__icon--agence" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+          </span>
+          <span class="hub-card__body">
+            <span class="hub-card-kicker">Espace</span>
+            <span class="hub-card-title">Agence</span>
+            <span class="hub-card-desc">Gérez bus, trajets et visibilité sur l’annuaire.</span>
+          </span>
+          <span class="hub-card__arrow" aria-hidden="true">→</span>
+        </a>
+        <a class="hub-card hub-card--admin" href="{{ url_for('web.connexion_role', role='admin', next=next_param or none) }}">
+          <span class="hub-card__icon hub-card__icon--admin" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"/></svg>
+          </span>
+          <span class="hub-card__body">
+            <span class="hub-card-kicker">Plateforme</span>
+            <span class="hub-card-title">Administrateur</span>
+            <span class="hub-card-desc">Validez les agences et supervisez l’activité.</span>
+          </span>
+          <span class="hub-card__arrow" aria-hidden="true">→</span>
+        </a>
+      </div>
+    </section>
+
+    <section class="auth-panel auth-panel--reg" aria-label="Options d’inscription">
+      <header class="hub-intro">
+        <p class="hub-eyebrow">Nouveau sur la plateforme</p>
+        <h1 class="hub-title">Créer un compte</h1>
+        <p class="hub-sub">Inscription ouverte aux <strong>clients</strong> et aux <strong>agences</strong>. Les comptes administrateur sont créés par l’équipe.</p>
+      </header>
+      <div class="hub-grid hub-grid--2">
+        <a class="hub-card hub-card--client" href="{{ url_for('web.inscription_role', role='client') }}">
+          <span class="hub-card__icon hub-card__icon--client" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"/><path stroke-linecap="round" stroke-linejoin="round" d="M19 8v6m3-3h-6"/></svg>
+          </span>
+          <span class="hub-card__body">
+            <span class="hub-card-kicker">Nouveau</span>
+            <span class="hub-card-title">Client</span>
+            <span class="hub-card-desc">Identité, email, CIN et mot de passe sécurisé.</span>
+          </span>
+          <span class="hub-card__arrow" aria-hidden="true">→</span>
+        </a>
+        <a class="hub-card hub-card--agence" href="{{ url_for('web.inscription_role', role='agence') }}">
+          <span class="hub-card__icon hub-card__icon--agence" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 21h19.5m-18-18v18m10.5-18v18M6.75 6.75h.008v.008H6.75V6.75zm0 4.5h.008v.008H6.75v-.008zm0 4.5h.008v.008H6.75V15zm0 4.5h.008v.008H6.75v-.008zm6.75-13.5h.008v.008h-.008V6.75zm0 4.5h.008v.008h-.008v-.008zm0 4.5h.008v.008h-.008V15zm0 4.5h.008v.008h-.008v-.008zm6.75-13.5h.008v.008h-.008V6.75zm0 4.5h.008v.008h-.008v-.008zm0 4.5h.008v.008h-.008V15zm0 4.5h.008v.008h-.008v-.008z"/></svg>
+          </span>
+          <span class="hub-card__body">
+            <span class="hub-card-kicker">Demande</span>
+            <span class="hub-card-title">Agence</span>
+            <span class="hub-card-desc">Soumission en attente de validation admin.</span>
+          </span>
+          <span class="hub-card__arrow" aria-hidden="true">→</span>
+        </a>
+      </div>
+    </section>
+
+    {% if session_kind %}
+    <div class="hub-bottom">
+      <a class="hub-cta-link" href="{{ url_for('web.agences_list') }}">
+        <span class="hub-cta-link__text">Consulter l’annuaire des agences actives</span>
+        <span class="hub-cta-link__icon" aria-hidden="true">→</span>
+      </a>
+    </div>
+    {% endif %}
+  </section>
+</div>
+{% endblock %}

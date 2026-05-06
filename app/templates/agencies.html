@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+{% from '_macros.html' import status_badge %}
+{% block title %}Agences actives — Trajets SaaS{% endblock %}
+{% block content %}
+<div class="page-wide py-dashboard">
+  <div class="section-head">
+    <h1 class="page-title">Agences actives</h1>
+    <p class="page-lead">
+      Réservé aux utilisateurs connectés — seules les agences au statut <strong>active</strong> apparaissent.
+    </p>
+  </div>
+
+  <div class="glass glass--compact">
+    <form class="filter-row" method="get" action="{{ url_for('web.agences_list') }}">
+      <input type="hidden" name="page" value="1"/>
+      <div class="field field--grow">
+        <label for="filtre-ville">Filtrer par ville</label>
+        <input id="filtre-ville" name="ville" type="search" placeholder="Ex. Nouakchott"
+          value="{{ ville_filter }}"/>
+      </div>
+      <button class="btn btn-primary btn-filter" type="submit">Appliquer</button>
+    </form>
+  </div>
+
+  {% if items is defined %}
+    <p class="muted-count">{{ total }} résultat{% if total > 1 %}s{% endif %}</p>
+    <ul class="ag-grid">
+      {% for a in items %}
+      <li>
+        <a class="agency-card glass-link" href="{{ url_for('web.agence_detail', agence_id=a.id) }}">
+          <div class="agency-row">
+            {% if a.logo %}
+              <img src="{{ url_for('agences.serve_logo', filename=a.logo) }}" alt="" width="56" height="56" loading="lazy" class="logo-thumb"/>
+            {% else %}
+              <span class="logo-placeholder" aria-hidden="true">{{ a.nom[:2]|upper }}</span>
+            {% endif %}
+            <div class="agency-meta">
+              <h2 class="agency-name">{{ a.nom }}</h2>
+              <p class="agency-city">{{ a.ville or '—' }}</p>
+              <div class="mt-sm">{{ status_badge(a.statut) }}</div>
+            </div>
+          </div>
+        </a>
+      </li>
+      {% endfor %}
+    </ul>
+
+    {% if pages > 1 %}
+    <nav class="pager" aria-label="Pagination">
+      {% if page > 1 %}
+        {% if ville_filter %}
+          <a class="btn btn-secondary" href="{{ url_for('web.agences_list', page=page-1, ville=ville_filter) }}">Précédent</a>
+        {% else %}
+          <a class="btn btn-secondary" href="{{ url_for('web.agences_list', page=page-1) }}">Précédent</a>
+        {% endif %}
+      {% else %}
+        <span class="btn btn-secondary btn-disabled" aria-disabled="true">Précédent</span>
+      {% endif %}
+      <span class="pager-meta">Page {{ page }} / {{ pages }}</span>
+      {% if page < pages %}
+        {% if ville_filter %}
+          <a class="btn btn-secondary" href="{{ url_for('web.agences_list', page=page+1, ville=ville_filter) }}">Suivant</a>
+        {% else %}
+          <a class="btn btn-secondary" href="{{ url_for('web.agences_list', page=page+1) }}">Suivant</a>
+        {% endif %}
+      {% else %}
+        <span class="btn btn-secondary btn-disabled" aria-disabled="true">Suivant</span>
+      {% endif %}
+    </nav>
+    {% endif %}
+  {% endif %}
+</div>
+{% endblock %}
