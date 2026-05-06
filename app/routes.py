@@ -15,24 +15,26 @@ places_bp = Blueprint("api_places", __name__)
 def route_generer():
     """
     Body JSON : { "id_bus": 3, "capacite": 15 }
+    "bus_id" est aussi accepté pour compatibilité.
     capacite est optionnel : si absent, on utilise la valeur de la table bus.
     """
     data = request.get_json(silent=True)
     if not data:
         return jsonify({"erreur": "Corps JSON manquant."}), 400
 
-    id_bus = data.get("id_bus")
+    # accepte id_bus (standard DB) ou bus_id (alias frontend)
+    bus_id = data.get("id_bus") or data.get("bus_id")
     capacite = data.get("capacite")  # optionnel
 
-    if id_bus is None:
-        return jsonify({"erreur": "Champ requis : id_bus."}), 400
-    if not isinstance(id_bus, int) or id_bus <= 0:
+    if bus_id is None:
+        return jsonify({"erreur": "Champ requis : id_bus (ou bus_id)."}), 400
+    if not isinstance(bus_id, int) or bus_id <= 0:
         return jsonify({"erreur": "id_bus doit être un entier positif."}), 400
     if capacite is not None and not isinstance(capacite, int):
         return jsonify({"erreur": "capacite doit être un entier."}), 400
 
     try:
-        resultat = generer_places(id_bus, capacite)
+        resultat = generer_places(bus_id, capacite)
         return jsonify(resultat), 201
     except ValueError as e:
         return jsonify({"erreur": str(e)}), 422
@@ -42,21 +44,21 @@ def route_generer():
         return jsonify({"erreur": "Erreur interne.", "detail": str(e)}), 500
 
 
-# ── GET /api/places/<id_bus> ────────────────────────────────────────────────
-@places_bp.get("/<int:id_bus>")
-def route_get_places(id_bus):
+# ── GET /api/places/<bus_id> ────────────────────────────────────────────────
+@places_bp.get("/<int:bus_id>")
+def route_get_places(bus_id):
     trajet_id = request.args.get("trajet_id", type=int)
     try:
         if trajet_id:
-            places = get_places_par_trajet(id_bus, trajet_id)
+            places = get_places_par_trajet(bus_id, trajet_id)
         else:
-            places = get_places_par_bus(id_bus)
+            places = get_places_par_bus(bus_id)
 
         if not places:
-            return jsonify({"erreur": f"Aucune place trouvée pour le bus {id_bus}."}), 404
+            return jsonify({"erreur": f"Aucune place trouvée pour le bus {bus_id}."}), 404
 
         return jsonify({
-            "id_bus": id_bus,
+            "bus_id": bus_id,
             "trajet_id": trajet_id,
             "total": len(places),
             "places": places,
@@ -65,11 +67,11 @@ def route_get_places(id_bus):
         return jsonify({"erreur": "Erreur interne.", "detail": str(e)}), 500
 
 
-# ── DELETE /api/places/<id_bus> ─────────────────────────────────────────────
-@places_bp.delete("/<int:id_bus>")
-def route_supprimer(id_bus):
+# ── DELETE /api/places/<bus_id> ─────────────────────────────────────────────
+@places_bp.delete("/<int:bus_id>")
+def route_supprimer(bus_id):
     try:
-        return jsonify(supprimer_places(id_bus)), 200
+        return jsonify(supprimer_places(bus_id)), 200
     except Exception as e:
         return jsonify({"erreur": "Erreur interne.", "detail": str(e)}), 500
 
