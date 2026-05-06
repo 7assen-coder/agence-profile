@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Paiement & Confirmation - G15/G16</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        /* TON CSS */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { background: #f5f5f5; font-family: 'Inter', sans-serif; font-size: 14px; color: #1a1a1a; padding: 2rem 1rem; }
+        .page { max-width: 600px; margin: 0 auto; }
+        h1 { font-size: 20px; font-weight: 600; margin-bottom: 1.5rem; color: #111; }
+        .tabs { display: flex; border-bottom: 2px solid #e5e5e5; margin-bottom: 1.5rem; }
+        .tab { padding: 9px 16px; border: none; background: transparent; font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 500; color: #888; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px; transition: all .15s; }
+        .tab.active { color: #111; border-bottom-color: #111; }
+        .tab:hover:not(.active) { color: #444; }
+        .panel { display: none; }
+        .panel.active { display: block; }
+        .card { background: #fff; border: 1px solid #e5e5e5; border-radius: 10px; padding: 1.25rem; margin-bottom: 1rem; }
+        .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .field { margin-bottom: 12px; }
+        .field label { display: block; font-size: 12px; font-weight: 500; color: #555; margin-bottom: 5px; }
+        .field input { width: 100%; padding: 9px 12px; border: 1px solid #ddd; border-radius: 7px; font-family: 'Inter', sans-serif; font-size: 14px; color: #111; background: #fff; transition: border-color .15s; }
+        .field input:focus { outline: none; border-color: #111; }
+        .preset-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; margin-bottom: 14px; }
+        .preset { border: 1px solid #e5e5e5; border-radius: 7px; padding: 8px 10px; cursor: pointer; background: #fafafa; transition: all .15s; }
+        .preset:hover { border-color: #111; background: #fff; }
+        .badge { font-size: 10px; padding: 1px 7px; border-radius: 4px; font-weight: 500; }
+        .badge-ok { background: #e8f5e9; color: #2e7d32; }
+        .badge-err { background: #fde8e8; color: #c53030; }
+        .btn { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 7px; font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 500; cursor: pointer; background: #fff; color: #111; transition: all .15s; }
+        .btn-dark { background: #111; border-color: #111; color: #fff; }
+        .btn-dark:hover { background: #333; }
+        .loader { display: none; align-items: center; gap: 8px; margin-top: 10px; font-size: 12px; color: #888; }
+        .spin { width: 14px; height: 14px; border: 2px solid #e5e5e5; border-top-color: #111; border-radius: 50%; animation: spin .6s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .result { display: none; border-radius: 7px; padding: .9rem 1rem; margin-top: .8rem; font-size: 13px; }
+        .result.ok { background: #f0fdf4; border: 1px solid #bbf7d0; }
+        .result.err { background: #fff5f5; border: 1px solid #fed7d7; }
+        .result-title { font-weight: 600; font-size: 13px; margin-bottom: 8px; }
+        .d-row { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid #f0f0f0; font-size: 12px; }
+        .d-val { font-family: monospace; }
+        .note { background: #f0f7ff; border: 1px solid #bfdbfe; border-radius: 7px; padding: 10px 12px; font-size: 12px; color: #1e40af; margin-bottom: 14px; }
+    </style>
+</head>
+<body>
+
+<div class="page">
+    <h1>Transport ESP — Paiement & Confirmation</h1>
+
+    <div class="tabs">
+        <button class="tab active" onclick="showTab('pay',this)">Effectuer Paiement</button>
+        <button class="tab" onclick="showTab('gen',this)">Générer Reçu Bankily</button>
+        <button class="tab" onclick="showTab('hist',this)">Mes Paiements</button>
+    </div>
+
+    <!-- PANNEAU PAYER -->
+    <div class="panel active" id="tab-pay">
+        <div class="note">✅ Une fois le paiement validé, la réservation sera automatiquement confirmée et un email sera envoyé.</div>
+        <div class="card">
+            <div class="row2">
+                <div class="field">
+                    <label>ID Réservation (Ex: 1)</label>
+                    <input type="number" id="p_resa" placeholder="ID Réservation">
+                </div>
+                <div class="field">
+                    <label>Numéro Bankily</label>
+                    <input type="text" id="p_tel" placeholder="22001234">
+                </div>
+            </div>
+            <div class="field">
+                <label>Code Transaction Bankily</label>
+                <input type="text" id="p_code" placeholder="BNK-XXXXXXX">
+            </div>
+            <button class="btn btn-dark" id="btn-pay" onclick="soumettrePaiement()">Confirmer le paiement</button>
+            
+            <div class="loader" id="l-pay"><div class="spin"></div>Vérification Bankily et mise à jour réservation...</div>
+            <div class="result" id="r-pay"></div>
+        </div>
+    </div>
+
+    <!-- PANNEAU GÉNÉRER (MOCK) -->
+    <div class="panel" id="tab-gen">
+        <div class="note">💡 Utilisez cet onglet pour simuler un paiement Bankily reçu sur votre téléphone.</div>
+        <div class="card">
+            <div class="row2">
+                <div class="field">
+                    <label>Votre Numéro</label>
+                    <input type="text" id="g_tel" value="22001234">
+                </div>
+                <div class="field">
+                    <label>Montant (MRU)</label>
+                    <input type="number" id="g_mont" value="500">
+                </div>
+            </div>
+            <button class="btn btn-dark" onclick="genererRecu()">Générer un faux reçu</button>
+            <div class="result" id="r-gen"></div>
+        </div>
+    </div>
+
+    <!-- PANNEAU HISTORIQUE -->
+    <div class="panel" id="tab-hist">
+        <div class="card">
+            <div class="field">
+                <label>Entrez votre ID Client</label>
+                <input type="number" id="h_id" value="1">
+            </div>
+            <button class="btn btn-dark" onclick="voirHistorique()">Afficher mes transactions</button>
+            <div class="result" id="r-hi"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+const APP  = 'http://localhost:5000';
+const BANK = 'http://localhost:5001';
+
+function showTab(id, el) {
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.getElementById('tab-' + id).classList.add('active');
+    el.classList.add('active');
+}
+
+function dRow(k,v) { return `<div class="d-row"><span class="d-key">${k}</span><span class="d-val">${v}</span></div>`; }
+
+async function soumettrePaiement() {
+    const btn = document.getElementById('btn-pay');
+    const resDiv = document.getElementById('r-pay');
+    const body = {
+        id_reservation: parseInt(document.getElementById('p_resa').value),
+        numero_bankily: document.getElementById('p_tel').value.trim(),
+        code_transaction: document.getElementById('p_code').value.trim()
+    };
+
+    if (!body.id_reservation || !body.numero_bankily || !body.code_transaction) {
+        alert("Veuillez remplir tous les champs."); return;
+    }
+
+    btn.disabled = true;
+    document.getElementById('l-pay').style.display = 'flex';
+    resDiv.style.display = 'none';
+
+    try {
+        const r = await fetch(APP + '/paiement/soumettre', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(body)
+        });
+        const d = await r.json();
+
+        document.getElementById('l-pay').style.display = 'none';
+        btn.disabled = false;
+        resDiv.style.display = 'block';
+
+        if (d.success) {
+            resDiv.className = 'result ok';
+            resDiv.innerHTML = `
+                <div class="result-title">✅ Réservation Confirmée !</div>
+                ${dRow('Paiement ID', '#' + d.id_paiement)}
+                ${dRow('Réservation ID', '#' + d.id_reservation)}
+                ${dRow('Statut Réservation', '<span class="badge badge-ok">CONFIRMÉE</span>')}
+                <p style="margin-top:10px; font-size:11px; color:#2e7d32;">L'email de confirmation a été enregistré dans le système.</p>
+            `;
+        } else {
+            resDiv.className = 'result err';
+            resDiv.innerHTML = `<div class="result-title">❌ Échec</div>${d.error}`;
+        }
+    } catch(e) {
+        document.getElementById('l-pay').style.display = 'none';
+        btn.disabled = false;
+        alert("Erreur: Impossible de contacter le serveur Flask.");
+    }
+}
+
+async function genererRecu() {
+    const tel = document.getElementById('g_tel').value;
+    const mont = document.getElementById('g_mont').value;
+    const resDiv = document.getElementById('r-gen');
+    try {
+        const r = await fetch(`${BANK}/bankily/generate?numero=${tel}&montant=${mont}`);
+        const d = await r.json();
+        if (d.success) {
+            resDiv.style.display = 'block';
+            resDiv.className = 'result ok';
+            resDiv.innerHTML = `<div class="result-title">Reçu généré !</div>Code: <strong>${d.recu.code_transaction}</strong><br>Copié dans le formulaire.`;
+            // Remplissage auto
+            document.getElementById('p_tel').value = tel;
+            document.getElementById('p_code').value = d.recu.code_transaction;
+            showTab('pay', document.querySelectorAll('.tab')[0]);
+        }
+    } catch(e) { alert("Lancez le script mock.py sur le port 5001"); }
+}
+
+async function voirHistorique() {
+    const id = document.getElementById('h_id').value;
+    const resDiv = document.getElementById('r-hi');
+    try {
+        const r = await fetch(`${APP}/paiement/historique/${id}`);
+        const d = await r.json();
+        resDiv.style.display = 'block';
+        resDiv.className = 'result ok';
+        if (d.length === 0) { resDiv.innerHTML = "Aucun paiement trouvé."; return; }
+        let h = `<div class="result-title">Historique Client #${id}</div>`;
+        d.forEach(p => {
+            h += `<div style="border-bottom:1px solid #eee; padding:5px 0;">
+                ID #${p.id_paiement} - ${p.montant} MRU - <strong>${p.statut}</strong>
+            </div>`;
+        });
+        resDiv.innerHTML = h;
+    } catch(e) { alert("Erreur serveur."); }
+}
+</script>
+
+</body>
+</html>
