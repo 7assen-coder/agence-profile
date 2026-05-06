@@ -1,17 +1,24 @@
-## Module : Validation des données
+# Agence Profile
 
-Ce module vérifie les données envoyées par les formulaires avant leur insertion dans la base MySQL.
+Application de gestion d’agence de transport développée avec Flask.
 
-Fichiers ajoutés :
-- `app/utils/validators.py` : fonctions génériques de validation.
-- `app/schemas/validation_schemas.py` : règles de validation métier.
-- `tests/test_validation.py` : tests unitaires des règles de validation.
+## Fonctionnalités
 
-Règles couvertes :
-- validation des agences
-- validation des clients
-- validation des villes
-- validation des trajets
-- validation des bus et des places
-- validation des réservations
-- validation des paiements
+- Gestion des agences
+- Gestion des trajets
+- Gestion des villes
+- Gestion des bus
+- Gestion des places
+- Gestion des réservations
+- Validation complète des données
+- Tests automatiques avec pytest
+
+---
+
+# Installation
+
+## 1. Cloner le projet
+
+```bash
+git clone <url-du-repository>
+cd agence-profile
