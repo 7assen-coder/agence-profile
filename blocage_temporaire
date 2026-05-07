@@ -1,0 +1,217 @@
+import threading
+import time
+from datetime import datetime, timedelta
+from flask import Flask, jsonify, request, render_template_string
+from flask_sqlalchemy import SQLAlchemy
+
+app = Flask(__name__)
+# Utilisation d'un verrou pour éviter les accès concurrents sur SQLite/MySQL pendant les écritures
+db_lock = threading.Lock()
+
+# --- CONFIGURATION DB ---
+# Note : Assurez-vous que la base 'transport_reservation' existe sur votre MySQL
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:@localhost/transport_reservation'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+db = SQLAlchemy(app)
+
+# --- MODÈLES ---
+class Place(db.Model):
+    __tablename__ = 'places'
+    id_place = db.Column(db.Integer, primary_key=True)
+    numero_place = db.Column(db.Integer)
+    status = db.Column(db.String(20), default='Disponible')
+
+class Reservation(db.Model):
+    __tablename__ = 'reservations'
+    id_reservation = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    id_place = db.Column(db.Integer)
+    statut = db.Column(db.Enum('en_attente', 'confirmee', 'annulee'), default='en_attente')
+    expire_a = db.Column(db.DateTime)
+
+# --- LOGIQUE DE NETTOYAGE (TIMER) ---
+def script_nettoyage():
+    """Vérifie chaque seconde si des réservations en attente ont expiré."""
+    while True:
+        time.sleep(1)
+        with app.app_context():
+            with db_lock:
+                try:
+                    now = datetime.now()
+                    # On récupère les réservations qui ont dépassé le temps 'expire_a'
+                    expirees = Reservation.query.filter(
+                        Reservation.statut == 'en_attente', 
+                        Reservation.expire_a <= now
+                    ).all()
+                    
+                    for r in expirees:
+                        r.statut = 'annulee'
+                        p = Place.query.get(r.id_place)
+                        if p and p.status == 'Bloquée':
+                            p.status = 'Disponible'
+                    db.session.commit()
+                except Exception as e:
+                    print(f"Erreur nettoyage: {e}")
+                    db.session.rollback()
+
+# --- ROUTES API ---
+@app.route('/')
+def index():
+    return render_template_string(HTML_UI)
+
+@app.route('/api/etat')
+def get_etat():
+    with db_lock:
+        places = Place.query.all()
+        data = []
+        now = datetime.now()
+        for p in places:
+            reste = 0
+            # On cherche la réservation active pour cette place
+            res = Reservation.query.filter_by(id_place=p.id_place, statut='en_attente').first()
+            if res:
+                diff = res.expire_a - now
+                reste = max(0, int(diff.total_seconds()))
+            
+            data.append({
+                'id': p.id_place, 
+                'n': p.numero_place, 
+                's': p.status, 
+                'r': reste
+            })
+        return jsonify(data)
+
+@app.route('/api/bloquer', methods=['POST'])
+def bloquer():
+    pid = request.json.get('id')
+    with db_lock:
+        try:
+            p = Place.query.get(pid)
+            if p and p.status == 'Disponible':
+                fin = datetime.now() + timedelta(seconds=30)
+                nouvelle_res = Reservation(id_place=pid, expire_a=fin, statut='en_attente')
+                db.session.add(nouvelle_res)
+                p.status = 'Bloquée'
+                db.session.commit()
+                return jsonify({'ok': True})
+        except Exception as e:
+            db.session.rollback()
+    return jsonify({'ok': False})
+
+@app.route('/api/payer', methods=['POST'])
+def payer():
+    pid = request.json.get('id')
+    with db_lock:
+        try:
+            # On récupère la dernière réservation en attente pour cette place
+            r = Reservation.query.filter_by(id_place=pid, statut='en_attente').first()
+            p = Place.query.get(pid)
+            if r and p:
+                r.statut = 'confirmee'
+                p.status = 'Réservée'
+                db.session.commit()
+                return jsonify({'ok': True})
+        except Exception as e:
+            db.session.rollback()
+    return jsonify({'ok': False})
+
+# --- INTERFACE HTML/JS ---
+HTML_UI = """
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Réservation de places</title>
+    <style>
+        * { user-select: none; box-sizing: border-box; }
+        body { background: #0f172a; color: white; font-family: sans-serif; text-align: center; padding: 20px; }
+        .grille { display: grid; grid-template-columns: repeat(4, 160px); gap: 15px; justify-content: center; margin-top: 30px; }
+        .place { height: 150px; border-radius: 12px; position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; border: 2px solid rgba(255,255,255,0.1); transition: 0.3s; }
+        .num { font-size: 2.5em; font-weight: 800; }
+        .stat { font-size: 0.8em; font-weight: bold; text-transform: uppercase; }
+        .Disponible { background: #22c55e; cursor: pointer; }
+        .Disponible:hover { transform: scale(1.05); }
+        .Bloquée { background: #f59e0b; }
+        .Réservée { background: #ef4444; opacity: 0.8; }
+        .timer { position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.6); padding: 2px 8px; border-radius: 4px; color: #fff; font-size: 0.9em; }
+        .btn-p { margin-top: 10px; width: 80%; padding: 8px; border: none; border-radius: 6px; background: white; color: #b45309; font-weight: bold; cursor: pointer; }
+        .btn-p:hover { background: #eee; }
+    </style>
+</head>
+<body>
+    <h2>Veuillez choisir une place à réserver.</h2>
+    <h3>Vous avez 30s pour valider votre réservation.</h3>
+    <div id="grid" class="grille"></div>
+
+    <script>
+        async function refresh() {
+            try {
+                const response = await fetch('/api/etat');
+                const data = await response.json();
+                const grid = document.getElementById('grid');
+                grid.innerHTML = '';
+
+                data.forEach(p => {
+                    const d = document.createElement('div');
+                    d.className = 'place ' + p.s;
+                    
+                    let html = '';
+                    if (p.s === 'Bloquée') {
+                        html += `<div class="timer">${p.r}s</div>`;
+                    }
+                    
+                    html += `<div class="num">${p.n}</div>`;
+                    html += `<div class="stat">${p.s}</div>`;
+                    
+                    if (p.s === 'Bloquée') {
+                        html += `<button class="btn-p" onclick="actionPayer(${p.id})">PAYER</button>`;
+                    } else if (p.s === 'Disponible') {
+                        d.onclick = () => actionBloquer(p.id);
+                    }
+
+                    d.innerHTML = html;
+                    grid.appendChild(d);
+                });
+            } catch(e) { console.error("Erreur refresh:", e); }
+        }
+
+        async function actionBloquer(id) {
+            await fetch('/api/bloquer', { 
+                method:'POST', 
+                headers:{'Content-Type':'application/json'}, 
+                body:JSON.stringify({id}) 
+            });
+            refresh();
+        }
+
+        async function actionPayer(id) {
+            const res = await fetch('/api/payer', { 
+                method:'POST', 
+                headers:{'Content-Type':'application/json'}, 
+                body:JSON.stringify({id}) 
+            });
+            const data = await res.json();
+            if(data.ok) refresh();
+        }
+
+        // Rafraîchissement automatique toutes les secondes
+        setInterval(refresh, 1000);
+        refresh();
+    </script>
+</body>
+</html>
+"""
+
+if __name__ == '__main__':
+    # Création des tables et initialisation des données de test
+    with app.app_context():
+        db.create_all()
+        if Place.query.count() == 0:
+            for i in range(1, 13):
+                db.session.add(Place(numero_place=i))
+            db.session.commit()
+
+    # Lancement du thread de nettoyage
+    threading.Thread(target=script_nettoyage, daemon=True).start()
+    
+    # Lancement du serveur (debug=False est préférable quand on utilise des threads de fond)
+    app.run(debug=False, port=5001)
