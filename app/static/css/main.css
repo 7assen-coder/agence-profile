@@ -10,8 +10,8 @@
   --text: #e8eaf0;
   --muted: #6b7080;
   --radius: 6px;
-  --mono: 'Space Mono', monospace;
-  --sans: 'Syne', sans-serif;
+  --mono: 'Courier New', Courier, monospace;
+  --sans: 'Segoe UI', system-ui, -apple-system, sans-serif;
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
