@@ -31,6 +31,34 @@ fake_transactions = {
         "montant": 300.00,
         "date": "2026-05-01T12:00:00",
         "statut": "failed"  # Pour tester le cas d'échec
+    },
+    "BNK-TEST-004": {
+        "code": "BNK-TEST-004",
+        "expediteur": "36002222",
+        "montant": 500.00,
+        "date": "2026-05-06T09:00:00",
+        "statut": "completed"
+    },
+    "BNK-TEST-005": {
+        "code": "BNK-TEST-005",
+        "expediteur": "36003333",
+        "montant": 500.00,
+        "date": "2026-05-06T09:30:00",
+        "statut": "completed"
+    },
+    "BNK-TEST-006": {
+        "code": "BNK-TEST-006",
+        "expediteur": "36004444",
+        "montant": 750.00,
+        "date": "2026-05-06T10:00:00",
+        "statut": "completed"
+    },
+    "BNK-TEST-007": {
+        "code": "BNK-TEST-007",
+        "expediteur": "36005555",
+        "montant": 300.00,
+        "date": "2026-05-06T10:30:00",
+        "statut": "completed"
     }
 }
 
