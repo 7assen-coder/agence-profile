@@ -37,8 +37,12 @@ def validate_client_data(data):
     if not is_valid_phone(data.get("telephone")):
         errors["telephone"] = "Numéro de téléphone invalide."
 
-    if not is_required(data.get("mot_de_passe")) or len(str(data.get("mot_de_passe"))) < 6:
-        errors["mot_de_passe"] = "Le mot de passe doit contenir au moins 6 caractères."
+    mot_de_passe = str(data.get("mot_de_passe", ""))
+
+    if len(mot_de_passe) < 6:
+        errors["mot_de_passe"] = (
+            "Le mot de passe doit contenir au moins 6 caractères."
+        )
 
     return errors
 
@@ -55,21 +59,28 @@ def validate_ville_data(data):
 def validate_trajet_data(data):
     errors = {}
 
-    if not is_required(data.get("ville_depart_id")):
+    ville_depart = data.get("ville_depart_id")
+    ville_arrivee = data.get("ville_arrivee_id")
+
+    if not is_required(ville_depart):
         errors["ville_depart_id"] = "La ville de départ est obligatoire."
 
-    if not is_required(data.get("ville_arrivee_id")):
+    if not is_required(ville_arrivee):
         errors["ville_arrivee_id"] = "La ville d'arrivée est obligatoire."
 
     if (
-        is_required(data.get("ville_depart_id"))
-        and is_required(data.get("ville_arrivee_id"))
-        and data.get("ville_depart_id") == data.get("ville_arrivee_id")
+        is_required(ville_depart)
+        and is_required(ville_arrivee)
+        and ville_depart == ville_arrivee
     ):
-        errors["ville_arrivee_id"] = "La ville d'arrivée doit être différente de la ville de départ."
+        errors["ville_arrivee_id"] = (
+            "La ville d'arrivée doit être différente."
+        )
 
     if not is_valid_horaire(data.get("horaire")):
-        errors["horaire"] = "L'horaire doit être matin ou apres_midi."
+        errors["horaire"] = (
+            "L'horaire doit être matin ou apres_midi."
+        )
 
     if not is_positive_number(data.get("prix")):
         errors["prix"] = "Le prix doit être positif."
@@ -93,8 +104,9 @@ def validate_reservation_data(data):
         errors["place_id"] = "La place est obligatoire."
 
     statut = data.get("statut", "en_attente")
+
     if not is_valid_status_reservation(statut):
-        errors["statut"] = "Le statut de réservation est invalide."
+        errors["statut"] = "Statut de réservation invalide."
 
     return errors
 
@@ -109,9 +121,11 @@ def validate_paiement_data(data):
         errors["montant"] = "Le montant doit être positif."
 
     if not is_valid_mode_paiement(data.get("mode_paiement")):
-        errors["mode_paiement"] = "Le mode de paiement est invalide."
+        errors["mode_paiement"] = "Mode de paiement invalide."
 
     return errors
+
+
 def validate_promotion_data(data):
     errors = {}
 
@@ -119,7 +133,9 @@ def validate_promotion_data(data):
         errors["code"] = "Le code promotionnel est obligatoire."
 
     if not is_positive_number(data.get("valeur")):
-        errors["valeur"] = "La valeur de la promotion doit être positive."
+        errors["valeur"] = (
+            "La valeur de la promotion doit être positive."
+        )
 
     return errors
 
@@ -131,9 +147,13 @@ def validate_disponibilite_data(data):
         errors["trajet_id"] = "Le trajet est obligatoire."
 
     if not is_valid_place_number(data.get("numero_place")):
-        errors["numero_place"] = "Le numéro de place doit être compris entre 1 et 12."
+        errors["numero_place"] = (
+            "Le numéro de place doit être entre 1 et 12."
+        )
 
     return errors
+
+
 def validate_bus_data(data):
     errors = {}
 
@@ -142,12 +162,20 @@ def validate_bus_data(data):
 
     try:
         capacite = int(data.get("capacite", 0))
+
         if capacite != 12:
-            errors["capacite"] = "La capacité du bus doit être exactement 12 places."
+            errors["capacite"] = (
+                "La capacité du bus doit être exactement 12 places."
+            )
+
     except (TypeError, ValueError):
-        errors["capacite"] = "La capacité du bus doit être un nombre valide."
+        errors["capacite"] = (
+            "La capacité du bus doit être un nombre valide."
+        )
 
     return errors
+
+
 def validate_place_data(data):
     errors = {}
 
@@ -155,6 +183,8 @@ def validate_place_data(data):
         errors["trajet_id"] = "Le trajet est obligatoire."
 
     if not is_valid_place_number(data.get("numero")):
-        errors["numero"] = "Le numéro de place doit être entre 1 et 12."
+        errors["numero"] = (
+            "Le numéro de place doit être entre 1 et 12."
+        )
 
     return errors

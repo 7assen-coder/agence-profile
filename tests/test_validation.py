@@ -6,20 +6,21 @@ from app.schemas.validation_schemas import (
     validate_bus_data,
     validate_client_data,
     validate_promotion_data,
-    validate_disponibilite_data
+    validate_disponibilite_data,
 )
 
 
 def test_agence_email_invalide():
     data = {
-        "nom": "Agence Test",
+        "nom": "",
         "email": "email_invalide",
-        "telephone": "22200000"
+        "telephone": "22200000",
     }
 
     errors = validate_agence_data(data)
 
     assert "email" in errors
+    assert "nom" in errors
 
 
 def test_trajet_villes_identiques():
@@ -29,7 +30,7 @@ def test_trajet_villes_identiques():
         "horaire": "matin",
         "prix": 500,
         "distance": 100,
-        "date_depart": "2026-05-06"
+        "date_depart": "2026-05-06",
     }
 
     errors = validate_trajet_data(data)
@@ -40,7 +41,7 @@ def test_trajet_villes_identiques():
 def test_place_numero_invalide():
     data = {
         "numero": 15,
-        "trajet_id": 1
+        "trajet_id": 1,
     }
 
     errors = validate_place_data(data)
@@ -52,7 +53,7 @@ def test_paiement_montant_negatif():
     data = {
         "reservation_id": 1,
         "montant": -500,
-        "mode_paiement": "bankily"
+        "mode_paiement": "bankily",
     }
 
     errors = validate_paiement_data(data)
@@ -63,7 +64,7 @@ def test_paiement_montant_negatif():
 def test_bus_capacite_invalide():
     data = {
         "trajet_id": 1,
-        "capacite": 20
+        "capacite": 20,
     }
 
     errors = validate_bus_data(data)
@@ -76,7 +77,7 @@ def test_client_mot_de_passe_court():
         "nom": "Client Test",
         "email": "client@test.com",
         "telephone": "22200000",
-        "mot_de_passe": "123"
+        "mot_de_passe": "123",
     }
 
     errors = validate_client_data(data)
@@ -87,7 +88,7 @@ def test_client_mot_de_passe_court():
 def test_promotion_valeur_invalide():
     data = {
         "code": "PROMO10",
-        "valeur": -10
+        "valeur": -10,
     }
 
     errors = validate_promotion_data(data)
@@ -98,7 +99,7 @@ def test_promotion_valeur_invalide():
 def test_disponibilite_place_invalide():
     data = {
         "trajet_id": 1,
-        "numero_place": 20
+        "numero_place": 20,
     }
 
     errors = validate_disponibilite_data(data)
