@@ -9,7 +9,7 @@ def _cursor(dictionary=True):
 
 # ── Helpers requêtes bus ────────────────────────────────────────────────────
 
-def get_bus(id_bus: int) -> dict | None:
+def get_bus(bus_id: int) -> dict | None:
     cur = _cursor()
     cur.execute(
         """
@@ -19,7 +19,7 @@ def get_bus(id_bus: int) -> dict | None:
         JOIN agences a ON a.id_agence = b.id_agence
         WHERE b.id_bus = %s
         """,
-        (id_bus,),
+        (bus_id,),
     )
     row = cur.fetchone()
     cur.close()
@@ -47,14 +47,14 @@ def get_all_bus() -> list[dict]:
 
 # ── Génération des places ───────────────────────────────────────────────────
 
-def generer_places(id_bus: int, capacite: int | None = None) -> dict:
+def generer_places(bus_id: int, capacite: int | None = None) -> dict:
     """
     Génère les places numérotées 1..capacite pour le bus donné.
     Si capacite est None, utilise la capacite stockée dans la table bus.
     """
-    bus = get_bus(id_bus)
+    bus = get_bus(bus_id)
     if not bus:
-        raise ValueError(f"Bus {id_bus} introuvable en base.")
+        raise ValueError(f"Bus {bus_id} introuvable en base.")
 
     cap = capacite if capacite is not None else bus["capacite"]
 
@@ -66,32 +66,32 @@ def generer_places(id_bus: int, capacite: int | None = None) -> dict:
     db = get_db()
     cur = db.cursor(dictionary=True)
 
-    cur.execute("SELECT COUNT(*) AS n FROM places WHERE id_bus = %s", (id_bus,))
+    cur.execute("SELECT COUNT(*) AS n FROM places WHERE id_bus = %s", (bus_id,))
     if cur.fetchone()["n"] > 0:
         cur.close()
         raise RuntimeError(
-            f"Les places du bus {id_bus} ont déjà été générées."
+            f"Les places du bus {bus_id} ont déjà été générées."
         )
 
     cur.executemany(
         "INSERT INTO places (id_bus, numero_place) VALUES (%s, %s)",
-        [(id_bus, num) for num in range(1, cap + 1)],
+        [(bus_id, num) for num in range(1, cap + 1)],
     )
     db.commit()
     cur.close()
 
     return {
-        "id_bus": id_bus,
+        "bus_id": bus_id,
         "immatriculation": bus["immatriculation"],
         "capacite": cap,
         "places_generees": cap,
-        "message": f"{cap} places générées avec succès pour le bus {id_bus}.",
+        "message": f"{cap} places générées avec succès pour le bus {bus_id}.",
     }
 
 
 # ── Lecture des places ──────────────────────────────────────────────────────
 
-def get_places_par_bus(id_bus: int) -> list[dict]:
+def get_places_par_bus(bus_id: int) -> list[dict]:
     """
     Retourne les places avec leur statut de réservation
     sur le trajet le plus récent du bus.
@@ -117,14 +117,14 @@ def get_places_par_bus(id_bus: int) -> list[dict]:
         WHERE p.id_bus = %s
         ORDER BY p.numero_place ASC
         """,
-        (id_bus,),
+        (bus_id,),
     )
     rows = cur.fetchall()
     cur.close()
     return rows
 
 
-def get_places_par_trajet(id_bus: int, trajet_id: int) -> list[dict]:
+def get_places_par_trajet(bus_id: int, trajet_id: int) -> list[dict]:
     """
     Retourne les places avec leur statut pour un trajet précis.
     """
@@ -147,7 +147,7 @@ def get_places_par_trajet(id_bus: int, trajet_id: int) -> list[dict]:
         WHERE p.id_bus = %s
         ORDER BY p.numero_place ASC
         """,
-        (trajet_id, id_bus),
+        (trajet_id, bus_id),
     )
     rows = cur.fetchall()
     cur.close()
@@ -156,17 +156,17 @@ def get_places_par_trajet(id_bus: int, trajet_id: int) -> list[dict]:
 
 # ── Suppression des places ──────────────────────────────────────────────────
 
-def supprimer_places(id_bus: int) -> dict:
+def supprimer_places(bus_id: int) -> dict:
     db = get_db()
     cur = db.cursor()
-    cur.execute("DELETE FROM places WHERE id_bus = %s", (id_bus,))
+    cur.execute("DELETE FROM places WHERE id_bus = %s", (bus_id,))
     supprimees = cur.rowcount
     db.commit()
     cur.close()
     return {
-        "id_bus": id_bus,
+        "bus_id": bus_id,
         "places_supprimees": supprimees,
-        "message": f"{supprimees} place(s) supprimée(s) pour le bus {id_bus}.",
+        "message": f"{supprimees} place(s) supprimée(s) pour le bus {bus_id}.",
     }
 
 
@@ -199,4 +199,45 @@ def get_stats() -> dict:
         "nb_places": nb_places,
         "bus_sans_places": bus_sans_places,
         "nb_reservations": nb_reservations,
+    }
+
+
+def supprimer_place_unique(id_place: int) -> dict:
+    """
+    Supprime une seule place par son id_place.
+    Bloqué si une réservation active existe sur cette place.
+    """
+    db = get_db()
+    cur = db.cursor(dictionary=True)
+
+    # Vérifier que la place existe
+    cur.execute("SELECT id_place, numero_place, id_bus FROM places WHERE id_place = %s", (id_place,))
+    place = cur.fetchone()
+    if not place:
+        cur.close()
+        raise ValueError(f"Place {id_place} introuvable.")
+
+    # Bloquer si réservation active
+    cur.execute(
+        """
+        SELECT COUNT(*) AS n FROM reservations
+        WHERE id_place = %s AND statut IN ('en_attente', 'confirmee')
+        """,
+        (id_place,),
+    )
+    if cur.fetchone()["n"] > 0:
+        cur.close()
+        raise RuntimeError(
+            f"La place {place['numero_place']} a une réservation active et ne peut pas être supprimée."
+        )
+
+    cur.execute("DELETE FROM places WHERE id_place = %s", (id_place,))
+    db.commit()
+    cur.close()
+
+    return {
+        "id_place": id_place,
+        "numero_place": place["numero_place"],
+        "bus_id": place["id_bus"],
+        "message": f"Place n°{place['numero_place']} supprimée avec succès.",
     }
