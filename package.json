@@ -1,0 +1,12 @@
+{
+  "name": "agence-profile",
+  "private": true,
+  "workspaces": ["frontend", "frontend-reservation"],
+  "scripts": {
+    "dev": "npm run dev -w frontend-reservation",
+    "build": "npm run build -w frontend"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1"
+  }
+}

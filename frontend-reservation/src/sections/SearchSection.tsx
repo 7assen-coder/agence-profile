@@ -16,24 +16,34 @@ export default function SearchSection({ onSearchResults }: SearchSectionProps) {
   const [villes, setVilles] = useState<Ville[]>([]);
   const [depart, setDepart] = useState<string>('');
   const [arrivee, setArrivee] = useState<string>('');
-  const [date, setDate] = useState<string>('');
+  const [date, setDate] = useState<string>('2026-05-07');
   const [periode, setPeriode] = useState<'matin' | 'apres-midi' | 'tous'>('tous');
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
+  // Load cities on mount
   useEffect(() => {
     getVilles().then(setVilles);
-    // Set default date to today
-    setDate(new Date().toISOString().split('T')[0]);
   }, []);
+
+  // Auto-prefill Kiffa → Nouadhibou once cities are loaded
+  useEffect(() => {
+    if (villes.length) {
+      const departVille = villes.find(v => v.nom.toLowerCase() === 'kiffa');
+      const arriveeVille = villes.find(v => v.nom.toLowerCase() === 'nouadhibou');
+      if (departVille) setDepart(String(departVille.id_ville));
+      if (arriveeVille) setArrivee(String(arriveeVille.id_ville));
+    }
+  }, [villes]);
 
   const handleSearch = async () => {
     const newErrors: Record<string, string> = {};
     if (!depart) newErrors.depart = 'Sélectionnez une ville de départ';
-    if (!arrivee) newErrors.arrivee = 'Sélectionnez une ville d\'arrivée';
+    if (!arrivee) newErrors.arrivee = "Sélectionnez une ville d'arrivée";
     if (!date) newErrors.date = 'Sélectionnez une date';
-    if (depart && arrivee && depart === arrivee) newErrors.arrivee = 'La ville d\'arrivée doit être différente';
-    
+    if (depart && arrivee && depart === arrivee)
+      newErrors.arrivee = "La ville d'arrivée doit être différente";
+
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
       return;
@@ -52,6 +62,18 @@ export default function SearchSection({ onSearchResults }: SearchSectionProps) {
     setLoading(false);
   };
 
+  const handlePresetKiffa = async () => {
+    const departVille = villes.find(v => v.nom.toLowerCase() === 'kiffa');
+    const arriveeVille = villes.find(v => v.nom.toLowerCase() === 'nouadhibou');
+    if (departVille) setDepart(String(departVille.id_ville));
+    if (arriveeVille) setArrivee(String(arriveeVille.id_ville));
+    setDate('2026-05-07');
+    // Wait for state update then search
+    setTimeout(async () => {
+      await handleSearch();
+    }, 100);
+  };
+
   return (
     <div className="min-h-screen flex flex-col">
       {/* Hero Section */}
@@ -61,7 +83,7 @@ export default function SearchSection({ onSearchResults }: SearchSectionProps) {
           <div className="absolute bottom-20 right-20 w-48 h-48 rounded-full bg-white/10"></div>
           <div className="absolute top-40 right-40 w-24 h-24 rounded-full bg-white/15"></div>
         </div>
-        
+
         <div className="relative z-10 px-6 pt-16 pb-24 max-w-7xl mx-auto">
           <div className="flex items-center gap-3 mb-8">
             <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
@@ -69,17 +91,17 @@ export default function SearchSection({ onSearchResults }: SearchSectionProps) {
             </div>
             <span className="text-xl font-bold tracking-tight">TransportReserve</span>
           </div>
-          
+
           <div className="max-w-2xl">
             <h1 className="text-5xl font-bold mb-6 leading-tight">
               Réservez votre voyage<br />
               <span className="text-cyan-300">en toute simplicité</span>
             </h1>
             <p className="text-lg text-cyan-100/80 mb-10 leading-relaxed max-w-lg">
-              Découvrez une nouvelle façon de voyager entre les villes. 
+              Découvrez une nouvelle façon de voyager entre les villes.
               Réservez votre place en temps réel, payez en ligne et recevez votre ticket instantanément.
             </p>
-            
+
             <div className="flex items-center gap-6 text-sm text-cyan-200">
               <div className="flex items-center gap-2">
                 <Clock className="w-4 h-4" />
@@ -106,7 +128,7 @@ export default function SearchSection({ onSearchResults }: SearchSectionProps) {
               <Bus className="w-5 h-5 text-[#0891b2]" />
               Rechercher un trajet
             </h2>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mb-6">
               {/* Ville départ */}
               <div className="space-y-2">
@@ -197,22 +219,33 @@ export default function SearchSection({ onSearchResults }: SearchSectionProps) {
                 <span className="inline-block w-2 h-2 rounded-full bg-green-500 mr-2"></span>
                 Réservation en temps réel
               </div>
-              <Button
-                onClick={handleSearch}
-                disabled={loading}
-                className="bg-gradient-to-r from-[#0c4a6e] to-[#0891b2] hover:from-[#0a3d5c] hover:to-[#067a96] text-white px-8 h-12 text-base font-medium rounded-xl shadow-lg shadow-[#0891b2]/20 transition-all"
-              >
-                {loading ? (
+              <div className="flex gap-2">
+                <Button
+                  onClick={handlePresetKiffa}
+                  disabled={loading}
+                  className="bg-gradient-to-r from-[#0891b2] to-[#0c4a6e] hover:from-[#067a96] hover:to-[#0a3d5c] text-white px-6 h-12 text-base font-medium rounded-xl shadow-lg transition-all"
+                >
                   <span className="flex items-center gap-2">
-                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                    Recherche...
+                    Kiffa → Nouadhibou <ArrowRight className="w-4 h-4" />
                   </span>
-                ) : (
-                  <span className="flex items-center gap-2">
-                    Rechercher <ArrowRight className="w-4 h-4" />
-                  </span>
-                )}
-              </Button>
+                </Button>
+                <Button
+                  onClick={handleSearch}
+                  disabled={loading}
+                  className="bg-gradient-to-r from-[#0c4a6e] to-[#0891b2] hover:from-[#0a3d5c] hover:to-[#067a96] text-white px-8 h-12 text-base font-medium rounded-xl shadow-lg shadow-[#0891b2]/20 transition-all"
+                >
+                  {loading ? (
+                    <span className="flex items-center gap-2">
+                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                      Recherche...
+                    </span>
+                  ) : (
+                    <span className="flex items-center gap-2">
+                      Rechercher <ArrowRight className="w-4 h-4" />
+                    </span>
+                  )}
+                </Button>
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -224,8 +257,8 @@ export default function SearchSection({ onSearchResults }: SearchSectionProps) {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {[
             { from: 'Nouakchott', to: 'Nouadhibou', prix: '850 MRU', time: '6h 00min' },
+            { from: 'Kiffa', to: 'Nouadhibou', prix: '1200 MRU', time: '10h 00min' },
             { from: 'Nouakchott', to: 'Kaédi', prix: '700 MRU', time: '8h 00min' },
-            { from: 'Nouadhibou', to: 'Sélibabi', prix: '1500 MRU', time: '14h 00min' },
           ].map((route, idx) => (
             <Card key={idx} className="border border-gray-100 hover:shadow-md transition-shadow cursor-pointer bg-gray-50/50">
               <CardContent className="p-4 flex items-center justify-between">
