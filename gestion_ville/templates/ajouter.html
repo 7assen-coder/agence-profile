@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ajouter une ville - Agence de Transport</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+    <header class="topbar">
+        <div class="logo-section">
+            <div class="logo-icon">
+                <i class="fa-solid fa-map-location-dot"></i>
+            </div>
+            <div>
+                <h1>Ajouter une ville</h1>
+                <p>Enregistrer une nouvelle destination dans le système</p>
+            </div>
+        </div>
+    </header>
+
+    <main class="main-container form-container">
+        <div class="card">
+            <div class="card-header" style="margin-bottom: 20px;">
+                <h3><i class="fa-solid fa-plus"></i> Formulaire d'ajout</h3>
+            </div>
+            
+            <form action="{{ url_for('ajouter') }}" method="POST">
+                
+                <div class="form-group">
+                    <label for="nom">Nom de la ville <span style="color: red;">*</span></label>
+                    <input type="text" id="nom" name="nom" required placeholder="Ex : Kiffa">
+                </div>
+
+                <div class="form-group">
+                    <label for="region">Région (Wilaya) <span style="color: red;">*</span></label>
+                    <input type="text" id="region" name="region" required placeholder="Ex : Assaba">
+                </div>
+
+                <div class="form-actions">
+                    <a href="{{ url_for('index') }}" class="btn btn-secondary">
+                        <i class="fa-solid fa-arrow-left"></i> Annuler
+                    </a>
+                    
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fa-solid fa-floppy-disk"></i> Enregistrer
+                    </button>
+                </div>
+                
+            </form>
+        </div>
+    </main>
+
+</body>
+</html>

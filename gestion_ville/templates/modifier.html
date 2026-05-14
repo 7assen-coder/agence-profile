@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Modifier une ville</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <header class="topbar">
+        <h1>Modifier la ville : {{ ville.nom }}</h1>
+    </header>
+
+    <main class="main-container form-container">
+        <form action="{{ url_for('modifier', id_ville=ville.id_ville) }}" method="POST" class="card">
+            <div class="form-group">
+                <label>Nom de la ville</label>
+                <input type="text" name="nom" value="{{ ville.nom }}" required>
+            </div>
+
+            <div class="form-group">
+                <label>Région (Wilaya)</label>
+                <input type="text" name="region" value="{{ ville.region }}" required>
+            </div>
+
+            <div class="form-actions">
+                <a href="{{ url_for('index') }}" class="btn btn-secondary">Annuler</a>
+                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-floppy-disk"></i> Mettre à jour</button>
+            </div>
+        </form>
+    </main>
+</body>
+</html>
