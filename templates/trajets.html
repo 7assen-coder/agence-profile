@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+{% block title %}Trajets — TransAvis{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">Trajets <span class="accent">& Notes</span></h1>
+    <p class="page-sub">Notation moyenne de chaque trajet par les clients</p>
+</div>
+
+<div id="trajets-list" class="trajets-grid"></div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function renderStars(note) {
+    return Array.from({length: 5}, (_, i) =>
+        `<span class="${i < Math.round(note) ? 'star filled' : 'star'}">★</span>`
+    ).join('');
+}
+
+fetch('/api/trajets')
+    .then(r => r.json())
+    .then(d => {
+        const container = document.getElementById('trajets-list');
+        if (!d.data.length) {
+            container.innerHTML = '<div class="empty">Aucun trajet disponible.</div>';
+            return;
+        }
+        container.innerHTML = d.data.map(t => `
+            <div class="trajet-card">
+                <div class="trajet-route">
+                    <span class="ville">${t.ville_depart || '?'}</span>
+                    <span class="arrow">→</span>
+                    <span class="ville">${t.ville_arrivee || '?'}</span>
+                </div>
+                <div class="trajet-info">
+                    <span class="info-item">📅 ${t.date_trajet || '—'}</span>
+                    <span class="info-item">🏢 ${t.agence_nom || '—'}</span>
+                    <span class="info-item">💰 ${t.prix || '—'} MRU</span>
+                </div>
+                <div class="trajet-note">
+                    <div class="stars">${t.note_moyenne ? renderStars(t.note_moyenne) : '<span class="no-note">Non noté</span>'}</div>
+                    <span class="note-val">${t.note_moyenne ? t.note_moyenne + ' / 5' : ''}</span>
+                    <span class="nb-avis">${t.nb_avis} avis</span>
+                </div>
+                <a href="/avis?trajet=${t.id_trajet}" class="btn-outline small">Voir les avis</a>
+            </div>
+        `).join('');
+    });
+</script>
+{% endblock %}

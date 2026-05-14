@@ -1,0 +1,462 @@
+{% extends 'base.html' %}
+{% block title %}Avis — TransAvis{% endblock %}
+
+{% block content %}
+
+<div class="section-header">
+    <div>
+        <div id="page-tag" style="display:inline-block;background:#111;color:#fff;font-size:11px;font-weight:700;padding:3px 12px;border-radius:20px;letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;">Avis clients</div>
+        <h2 id="page-title" style="font-size:32px;font-weight:800;">Tous les <span style="text-decoration:underline;text-underline-offset:6px;">avis</span></h2>
+        <p id="page-subtitle" style="font-size:14px;color:#888;margin-top:4px;"></p>
+    </div>
+    <div style="display:flex;gap:10px;align-items:center;">
+        <button id="btn-retour" onclick="window.history.back()" style="display:none;background:transparent;color:#111;border:2px solid #111;border-radius:10px;padding:10px 18px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;">← Retour</button>
+        <button class="btn btn-primary" onclick="ouvrirModal()">+ Donner un avis</button>
+    </div>
+</div>
+
+<!-- LISTE AVIS -->
+<div id="avis-list" style="display:flex;flex-direction:column;gap:14px;">
+    <div style="text-align:center;padding:40px;color:#888;font-style:italic;">Chargement des avis...</div>
+</div>
+
+<!-- ================================================
+     MODAL AJOUTER AVIS
+     ================================================ -->
+<div id="modal-add" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:9999;align-items:center;justify-content:center;padding:20px;">
+<div style="background:#fff;border-radius:14px;width:100%;max-width:560px;max-height:90vh;overflow-y:auto;border:2px solid #111;box-shadow:0 8px 40px rgba(0,0,0,0.2);">
+
+    <div style="background:#111;color:#fff;padding:18px 24px;border-radius:12px 12px 0 0;display:flex;justify-content:space-between;align-items:center;">
+        <h3 style="font-size:18px;font-weight:700;">✍️ Donner un avis</h3>
+        <button onclick="fermerModal()" style="background:none;border:none;color:#fff;font-size:20px;cursor:pointer;">✕</button>
+    </div>
+
+    <div style="padding:24px;display:flex;flex-direction:column;gap:18px;">
+
+        <!-- NOM -->
+        <div>
+            <label style="display:block;font-weight:700;font-size:12px;margin-bottom:6px;text-transform:uppercase;letter-spacing:1px;">Votre nom *</label>
+            <input type="text" id="f-nom" placeholder="Ex: Ahmed Ould Mohamed..." style="width:100%;padding:12px 14px;border:2px solid #ddd;border-radius:10px;font-size:14px;font-family:inherit;outline:none;">
+        </div>
+
+        <!-- AGENCE (masqué si trajet déjà sélectionné) -->
+        <div id="field-agence">
+            <label style="display:block;font-weight:700;font-size:12px;margin-bottom:10px;text-transform:uppercase;letter-spacing:1px;">Agence de transport *</label>
+            <div id="agences-grid" style="display:flex;gap:10px;flex-wrap:wrap;"></div>
+        </div>
+
+        <!-- TRAJET -->
+        <div id="field-trajets" style="display:none;">
+            <label style="display:block;font-weight:700;font-size:12px;margin-bottom:10px;text-transform:uppercase;letter-spacing:1px;">Trajet effectué *</label>
+            <div id="trajets-liste" style="display:flex;flex-direction:column;gap:8px;"></div>
+            <input type="hidden" id="add-trajet-id">
+        </div>
+
+        <!-- NOTE -->
+        <div>
+            <label style="display:block;font-weight:700;font-size:12px;margin-bottom:10px;text-transform:uppercase;letter-spacing:1px;">Votre note *</label>
+            <div id="big-stars" style="display:flex;gap:6px;">
+                <span class="bstar" data-val="1" style="font-size:42px;cursor:pointer;color:#ddd;transition:all 0.15s;">★</span>
+                <span class="bstar" data-val="2" style="font-size:42px;cursor:pointer;color:#ddd;transition:all 0.15s;">★</span>
+                <span class="bstar" data-val="3" style="font-size:42px;cursor:pointer;color:#ddd;transition:all 0.15s;">★</span>
+                <span class="bstar" data-val="4" style="font-size:42px;cursor:pointer;color:#ddd;transition:all 0.15s;">★</span>
+                <span class="bstar" data-val="5" style="font-size:42px;cursor:pointer;color:#ddd;transition:all 0.15s;">★</span>
+            </div>
+            <div id="note-label" style="font-size:13px;color:#888;margin-top:4px;font-weight:600;">Cliquez pour noter</div>
+            <input type="hidden" id="add-note" value="">
+        </div>
+
+        <!-- COMMENTAIRE -->
+        <div>
+            <label style="display:block;font-weight:700;font-size:12px;margin-bottom:6px;text-transform:uppercase;letter-spacing:1px;">Commentaire</label>
+            <textarea id="add-comment" rows="4" placeholder="Partagez votre expérience..." style="width:100%;padding:12px 14px;border:2px solid #ddd;border-radius:10px;font-size:14px;font-family:inherit;outline:none;resize:vertical;"></textarea>
+        </div>
+
+        <div id="add-error" style="color:#c00;background:#fff0f0;padding:10px 14px;border-radius:8px;font-size:13px;display:none;border-left:3px solid #c00;"></div>
+    </div>
+
+    <div style="padding:16px 24px;border-top:1px solid #eee;display:flex;justify-content:flex-end;gap:10px;">
+        <button onclick="fermerModal()" style="background:transparent;color:#111;border:2px solid #111;border-radius:10px;padding:10px 20px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;">Annuler</button>
+        <button onclick="publierAvis()" style="background:#111;color:#fff;border:none;border-radius:10px;padding:10px 24px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;">Publier mon avis</button>
+    </div>
+</div>
+</div>
+
+<!-- MODAL RÉPONDRE -->
+<div id="modal-reply" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:9999;align-items:center;justify-content:center;padding:20px;">
+<div style="background:#fff;border-radius:14px;width:100%;max-width:480px;border:2px solid #111;box-shadow:0 8px 40px rgba(0,0,0,0.2);">
+    <div style="background:#111;color:#fff;padding:18px 24px;border-radius:12px 12px 0 0;display:flex;justify-content:space-between;align-items:center;">
+        <h3 style="font-size:17px;font-weight:700;">↩ Répondre à l'avis</h3>
+        <button onclick="fermerReply()" style="background:none;border:none;color:#fff;font-size:20px;cursor:pointer;">✕</button>
+    </div>
+    <div style="padding:24px;display:flex;flex-direction:column;gap:16px;">
+        <input type="hidden" id="reply-id">
+        <div>
+            <label style="display:block;font-weight:700;font-size:12px;margin-bottom:6px;text-transform:uppercase;">Réponse *</label>
+            <textarea id="reply-txt" rows="4" placeholder="Votre réponse au client..." style="width:100%;padding:12px;border:2px solid #ddd;border-radius:10px;font-size:14px;font-family:inherit;outline:none;resize:vertical;"></textarea>
+        </div>
+        <div id="reply-error" style="color:#c00;font-size:13px;"></div>
+    </div>
+    <div style="padding:16px 24px;border-top:1px solid #eee;display:flex;justify-content:flex-end;gap:10px;">
+        <button onclick="fermerReply()" style="background:transparent;color:#111;border:2px solid #111;border-radius:10px;padding:10px 20px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;">Annuler</button>
+        <button onclick="envoyerReponse()" style="background:#111;color:#fff;border:none;border-radius:10px;padding:10px 24px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;">Envoyer</button>
+    </div>
+</div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+// ==============================
+// PARAMÈTRE URL (filtre trajet)
+// ==============================
+const urlParams   = new URLSearchParams(window.location.search);
+const trajetParam = urlParams.get('trajet');
+let   noteVal     = 0;
+let   agenceId    = null;
+let   trajetId    = trajetParam ? parseInt(trajetParam) : null;
+const noteLabels  = ['','Mauvais 😞','Passable 😐','Bien 🙂','Très bien 😊','Excellent ! 🌟'];
+
+// Adapter le titre selon le filtre
+if (trajetParam) {
+    document.getElementById('btn-retour').style.display = 'inline-block';
+    document.getElementById('page-tag').textContent = 'Avis filtrés';
+    document.getElementById('page-subtitle').textContent = 'Avis pour ce trajet uniquement';
+    // Cacher le champ agence/trajet dans la modale car déjà pré-sélectionné
+    document.getElementById('field-agence').style.display = 'none';
+    document.getElementById('field-trajets').style.display = 'none';
+    // Récupérer le nom du trajet pour le titre
+    fetch(`/api/avis?trajet=${trajetParam}`)
+        .then(r => r.json())
+        .then(d => {
+            if (d.ok && d.data.length > 0) {
+                const a = d.data[0];
+                document.getElementById('page-title').innerHTML =
+                    `Avis : <span style="text-decoration:underline;text-underline-offset:6px;">${a.depart} → ${a.arrivee}</span>`;
+            }
+        });
+}
+
+// ==============================
+// ÉTOILES
+// ==============================
+document.querySelectorAll('.bstar').forEach(star => {
+    star.addEventListener('click', function() {
+        noteVal = parseInt(this.dataset.val);
+        document.getElementById('add-note').value = noteVal;
+        document.getElementById('note-label').textContent = noteLabels[noteVal];
+        updateStars(noteVal);
+    });
+    star.addEventListener('mouseover', function() { updateStars(parseInt(this.dataset.val)); });
+    star.addEventListener('mouseout',  function() { updateStars(noteVal); });
+});
+
+function updateStars(val) {
+    document.querySelectorAll('.bstar').forEach((s, i) => {
+        s.style.color = i < val ? '#111' : '#ddd';
+        s.style.transform = i < val ? 'scale(1.1)' : 'scale(1)';
+    });
+}
+
+// ==============================
+// MODAL
+// ==============================
+function ouvrirModal() {
+    resetForm();
+    if (!trajetParam) chargerAgences();
+    document.getElementById('modal-add').style.display = 'flex';
+}
+
+function fermerModal() {
+    document.getElementById('modal-add').style.display = 'none';
+}
+
+function fermerReply() {
+    document.getElementById('modal-reply').style.display = 'none';
+}
+
+document.getElementById('modal-add').addEventListener('click', e => {
+    if (e.target === e.currentTarget) fermerModal();
+});
+
+document.getElementById('modal-reply').addEventListener('click', e => {
+    if (e.target === e.currentTarget) fermerReply();
+});
+
+document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') { fermerModal(); fermerReply(); }
+});
+
+function resetForm() {
+    noteVal = 0; agenceId = null;
+    if (!trajetParam) trajetId = null;
+    document.getElementById('f-nom').value = '';
+    document.getElementById('add-comment').value = '';
+    document.getElementById('add-note').value = '';
+    document.getElementById('note-label').textContent = 'Cliquez pour noter';
+    document.getElementById('add-error').style.display = 'none';
+    updateStars(0);
+    if (!trajetParam) {
+        document.getElementById('field-trajets').style.display = 'none';
+        document.getElementById('trajets-liste').innerHTML = '';
+        document.getElementById('add-trajet-id').value = '';
+    }
+}
+
+// ==============================
+// CHARGER AGENCES
+// ==============================
+function chargerAgences() {
+    fetch('/api/agences')
+        .then(r => r.json())
+        .then(d => {
+            const g = document.getElementById('agences-grid');
+            if (!d.ok || !d.data.length) {
+                g.innerHTML = '<div style="color:#888;font-size:13px;">Aucune agence.</div>';
+                return;
+            }
+            g.innerHTML = d.data.map(a => `
+                <div onclick="choisirAgence(${a.id_agence}, this)" style="
+                    background:#f5f5f5;border:2px solid #ddd;border-radius:10px;
+                    padding:14px 18px;cursor:pointer;text-align:center;
+                    min-width:130px;transition:all 0.2s;
+                ">
+                    <div style="width:40px;height:40px;background:#111;color:#fff;border-radius:50%;
+                        display:flex;align-items:center;justify-content:center;
+                        font-weight:700;font-size:16px;margin:0 auto 8px;">${a.Nom.charAt(0)}</div>
+                    <div style="font-weight:700;font-size:13px;">${a.Nom}</div>
+                    <div style="font-size:11px;color:#888;margin-top:2px;">${a.note_moyenne ? a.note_moyenne+' ★' : 'Nouveau'}</div>
+                </div>
+            `).join('');
+        });
+}
+
+function choisirAgence(id, el) {
+    agenceId = id;
+    document.querySelectorAll('#agences-grid > div').forEach(c => {
+        c.style.border = '2px solid #ddd';
+        c.style.background = '#f5f5f5';
+    });
+    el.style.border = '2px solid #111';
+    el.style.background = '#111';
+    el.style.color = '#fff';
+
+    fetch(`/api/agences/${id}/trajets`)
+        .then(r => r.json())
+        .then(d => {
+            const box = document.getElementById('field-trajets');
+            const lst = document.getElementById('trajets-liste');
+            box.style.display = 'block';
+            if (!d.ok || !d.data.length) {
+                lst.innerHTML = '<div style="color:#888;font-size:13px;padding:8px;">Aucun trajet.</div>';
+                return;
+            }
+            lst.innerHTML = d.data.map(t => `
+                <div onclick="choisirTrajet(${t.id_trajet}, this)" style="
+                    background:#f5f5f5;border:2px solid #ddd;border-radius:10px;
+                    padding:12px 16px;cursor:pointer;
+                    display:flex;justify-content:space-between;align-items:center;
+                    transition:all 0.2s;
+                ">
+                    <div style="font-weight:700;font-size:14px;">${t.depart} → ${t.arrivee}</div>
+                    <div style="font-size:12px;color:#888;">${t.moment_journee} · ${t.prix} MRU</div>
+                </div>
+            `).join('');
+        });
+}
+
+function choisirTrajet(id, el) {
+    trajetId = id;
+    document.getElementById('add-trajet-id').value = id;
+    document.querySelectorAll('#trajets-liste > div').forEach(c => {
+        c.style.border = '2px solid #ddd';
+        c.style.background = '#f5f5f5';
+        c.style.color = '#111';
+    });
+    el.style.border = '2px solid #111';
+    el.style.background = '#111';
+    el.style.color = '#fff';
+}
+
+// ==============================
+// PUBLIER AVIS
+// ==============================
+function publierAvis() {
+    const nom    = document.getElementById('f-nom').value.trim();
+    const note   = document.getElementById('add-note').value;
+    const comment= document.getElementById('add-comment').value.trim();
+    const err    = document.getElementById('add-error');
+
+    err.style.display = 'none';
+
+    if (!nom)     { showErr(err, '⚠️ Entrez votre nom.'); return; }
+    if (!trajetId){ showErr(err, '⚠️ Choisissez un trajet.'); return; }
+    if (!note)    { showErr(err, '⚠️ Cliquez sur les étoiles pour noter.'); return; }
+
+    fetch('/api/clients', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({nom})
+    })
+    .then(r => r.json())
+    .then(d => {
+        if (!d.ok && !d.id) { showErr(err, '❌ Erreur client.'); return; }
+        return fetch('/api/avis', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                client_id: d.id,
+                trajet_id: trajetId,
+                note_globale: parseInt(note),
+                commentaire: comment
+            })
+        });
+    })
+    .then(r => r && r.json())
+    .then(d => {
+        if (d && d.ok) { fermerModal(); chargerAvis(); }
+        else if (d)    { showErr(err, '❌ ' + (d.msg || 'Erreur')); }
+    })
+    .catch(() => showErr(err, '❌ Erreur de connexion.'));
+}
+
+function showErr(el, msg) {
+    el.textContent = msg;
+    el.style.display = 'block';
+}
+
+// ==============================
+// CHARGER ET AFFICHER AVIS
+// ==============================
+function chargerAvis() {
+    const url = trajetParam ? `/api/avis?trajet=${trajetParam}` : '/api/avis';
+    fetch(url)
+        .then(r => r.json())
+        .then(d => {
+            const c = document.getElementById('avis-list');
+            if (!d.ok || !d.data.length) {
+                c.innerHTML = `
+                    <div style="text-align:center;padding:60px;color:#888;">
+                        <div style="font-size:48px;margin-bottom:16px;">💬</div>
+                        <div style="font-size:18px;font-weight:700;margin-bottom:8px;">Aucun avis pour le moment</div>
+                        <div style="font-size:14px;">Soyez le premier à donner votre avis !</div>
+                    </div>`;
+                return;
+            }
+
+            // Afficher le nombre d'avis dans le titre
+            const nb = d.data.length;
+            document.getElementById('page-subtitle').textContent =
+                `${nb} avis${nb > 1 ? '' : ''} trouvé${nb > 1 ? 's' : ''}`;
+
+            c.innerHTML = d.data.map(a => `
+                <div style="
+                    background:#fff;border:1.5px solid #e5e5e5;border-radius:12px;
+                    padding:22px 24px;box-shadow:0 2px 12px rgba(0,0,0,0.06);
+                    transition:box-shadow 0.2s;
+                " onmouseover="this.style.boxShadow='0 6px 24px rgba(0,0,0,0.12)'"
+                   onmouseout="this.style.boxShadow='0 2px 12px rgba(0,0,0,0.06)'">
+
+                    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
+                        <div style="display:flex;align-items:center;gap:10px;">
+                            <div style="width:42px;height:42px;background:#111;color:#fff;border-radius:50%;
+                                display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;flex-shrink:0;">
+                                ${(a.client_nom||'?').charAt(0).toUpperCase()}
+                            </div>
+                            <div>
+                                <div style="font-weight:700;font-size:15px;">${a.client_nom || 'Anonyme'}</div>
+                                <div style="font-size:12px;color:#888;font-family:monospace;">${a.date_creation || ''}</div>
+                            </div>
+                        </div>
+                        <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
+                            ${a.agence_nom ? `<span style="background:#111;color:#fff;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;">🏢 ${a.agence_nom}</span>` : ''}
+                            ${a.depart ? `<span style="background:#f0f0f0;color:#444;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;">🚌 ${a.depart} → ${a.arrivee}</span>` : ''}
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom:10px;">${renderStars(a.note_globale)}</div>
+                    <p style="font-size:14px;color:#555;line-height:1.7;margin-bottom:14px;">${a.commentaire || '<em style="color:#aaa">Aucun commentaire</em>'}</p>
+
+                    <div style="display:flex;gap:8px;">
+                        <button onclick="ouvrirReply(${a.id})" style="
+                            background:#111;color:#fff;border:none;border-radius:8px;
+                            padding:7px 16px;font-size:13px;font-weight:600;cursor:pointer;
+                            font-family:inherit;">↩ Répondre</button>
+                        <button onclick="supprimerAvis(${a.id})" style="
+                            background:transparent;color:#888;border:1.5px solid #ddd;border-radius:8px;
+                            padding:7px 16px;font-size:13px;cursor:pointer;font-family:inherit;">✕ Supprimer</button>
+                    </div>
+
+                    <div id="reps-${a.id}" style="margin-top:14px;display:flex;flex-direction:column;gap:8px;"></div>
+                </div>
+            `).join('');
+
+            d.data.forEach(a => chargerReponses(a.id));
+        });
+}
+
+function chargerReponses(avisId) {
+    fetch(`/api/reponses?avis_id=${avisId}`)
+        .then(r => r.json())
+        .then(d => {
+            const z = document.getElementById(`reps-${avisId}`);
+            if (!z || !d.ok || !d.data.length) return;
+            z.innerHTML = d.data.map(r => `
+                <div style="
+                    background:#f8f8f8;border-left:3px solid #111;
+                    border-radius:0 8px 8px 0;padding:12px 16px;
+                    display:flex;gap:10px;
+                ">
+                    <span style="color:#111;font-size:14px;">↩</span>
+                    <div>
+                        <div style="font-weight:700;font-size:13px;">
+                            Agence <span style="font-weight:400;color:#888;font-size:12px;margin-left:6px;">${r.date_reponse || ''}</span>
+                        </div>
+                        <p style="font-size:14px;color:#555;margin-top:4px;line-height:1.6;">${r.reponse}</p>
+                    </div>
+                </div>
+            `).join('');
+        });
+}
+
+function renderStars(note) {
+    if (!note) return '<span style="color:#ccc">—</span>';
+    return Array.from({length:5},(_,i) =>
+        `<span style="font-size:18px;color:${i < note ? '#111' : '#ddd'}">★</span>`
+    ).join('');
+}
+
+function supprimerAvis(id) {
+    if (!confirm('Supprimer cet avis ?')) return;
+    fetch(`/api/avis/${id}`, {method:'DELETE'}).then(() => chargerAvis());
+}
+
+function ouvrirReply(aid) {
+    document.getElementById('reply-id').value = aid;
+    document.getElementById('reply-txt').value = '';
+    document.getElementById('reply-error').textContent = '';
+    document.getElementById('modal-reply').style.display = 'flex';
+}
+
+function envoyerReponse() {
+    const aid = document.getElementById('reply-id').value;
+    const rep = document.getElementById('reply-txt').value.trim();
+    const err = document.getElementById('reply-error');
+    if (!rep) { err.textContent = '⚠️ Écrivez une réponse.'; return; }
+    fetch('/api/reponses', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({avis_id: parseInt(aid), reponse: rep})
+    })
+    .then(r => r.json())
+    .then(d => {
+        if (d.ok) { fermerReply(); chargerAvis(); }
+        else err.textContent = '❌ ' + (d.msg || 'Erreur');
+    });
+}
+
+// INIT
+chargerAvis();
+</script>
+{% endblock %}

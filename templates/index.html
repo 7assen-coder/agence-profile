@@ -1,0 +1,100 @@
+{% extends 'base.html' %}
+{% block title %}Accueil — TransAvis{% endblock %}
+
+{% block content %}
+<div class="hero">
+    <div class="hero-tag">Plateforme de feedback</div>
+    <h1 class="hero-title">Gérez les avis de<br>vos <span class="accent">clients</span></h1>
+    <p class="hero-sub">Collectez, analysez et répondez aux avis clients sur vos trajets de transport.</p>
+    <div class="hero-actions">
+        <a href="/avis" class="btn-primary">Voir les avis</a>
+        <a href="/statistiques" class="btn-outline">Statistiques</a>
+    </div>
+</div>
+
+<!-- STATS RAPIDES -->
+<div class="stats-row" id="stats-row">
+    <div class="stat-box">
+        <div class="stat-num" id="stat-avis">—</div>
+        <div class="stat-lbl">Avis total</div>
+    </div>
+    <div class="stat-box highlight">
+        <div class="stat-num" id="stat-note">—</div>
+        <div class="stat-lbl">Note moyenne</div>
+        <div class="stars" id="stat-stars"></div>
+    </div>
+    <div class="stat-box">
+        <div class="stat-num" id="stat-trajets">—</div>
+        <div class="stat-lbl">Trajets notés</div>
+    </div>
+    <div class="stat-box">
+        <div class="stat-num" id="stat-reponses">—</div>
+        <div class="stat-lbl">Réponses données</div>
+    </div>
+</div>
+
+<!-- DERNIERS AVIS -->
+<div class="section">
+    <div class="section-header">
+        <h2 class="section-title">Derniers avis</h2>
+        <a href="/avis" class="see-all">Voir tout →</a>
+    </div>
+    <div id="derniers-avis" class="avis-grid"></div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+fetch('/api/statistiques')
+    .then(r => r.json())
+    .then(d => {
+        const g = d.data.global;
+        document.getElementById('stat-avis').textContent = g.total_avis || 0;
+        document.getElementById('stat-note').textContent = g.note_moyenne ? g.note_moyenne + ' / 5' : '—';
+        document.getElementById('stat-reponses').textContent = d.data.reponses.total_reponses || 0;
+        if (g.note_moyenne) {
+            document.getElementById('stat-stars').innerHTML = renderStars(Math.round(g.note_moyenne));
+        }
+    });
+
+fetch('/api/trajets')
+    .then(r => r.json())
+    .then(d => {
+        const notes = d.data.filter(t => t.nb_avis > 0);
+        document.getElementById('stat-trajets').textContent = notes.length;
+    });
+
+fetch('/api/avis')
+    .then(r => r.json())
+    .then(d => {
+        const container = document.getElementById('derniers-avis');
+        const avis = d.data.slice(0, 6);
+        if (!avis.length) {
+            container.innerHTML = '<p class="empty">Aucun avis pour le moment.</p>';
+            return;
+        }
+        container.innerHTML = avis.map(a => `
+            <div class="avis-card">
+                <div class="avis-top">
+                    <div class="avis-client">
+                        <div class="avatar">${(a.client_nom || 'C').charAt(0)}</div>
+                        <div>
+                            <div class="client-name">${a.client_nom || 'Client'}</div>
+                            <div class="avis-date">${a.date_avis || ''}</div>
+                        </div>
+                    </div>
+                    <div class="stars">${renderStars(a.note)}</div>
+                </div>
+                ${a.ville_depart ? `<div class="trajet-tag">🚌 ${a.ville_depart} → ${a.ville_arrivee}</div>` : ''}
+                <p class="avis-comment">${a.commentaire || '<em>Aucun commentaire</em>'}</p>
+            </div>
+        `).join('');
+    });
+
+function renderStars(note) {
+    return Array.from({length: 5}, (_, i) =>
+        `<span class="${i < note ? 'star filled' : 'star'}">★</span>`
+    ).join('');
+}
+</script>
+{% endblock %}

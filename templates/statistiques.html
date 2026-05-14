@@ -1,0 +1,113 @@
+{% extends 'base.html' %}
+{% block title %}Statistiques — TransAvis{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Statis<span class="accent">tiques</span></h1>
+        <p class="page-sub">Vue d'ensemble des avis et notations clients</p>
+    </div>
+</div>
+
+<!-- STATS GLOBALES -->
+<div class="stats-row" id="stats-global"></div>
+
+<div class="stats-grid-2">
+    <!-- Répartition des notes -->
+    <div class="stat-panel">
+        <h3 class="panel-title">Répartition des notes globales</h3>
+        <div id="repartition"></div>
+    </div>
+
+    <!-- Moyennes par critère -->
+    <div class="stat-panel">
+        <h3 class="panel-title">Moyenne par critère</h3>
+        <div id="moyennes"></div>
+    </div>
+</div>
+
+<!-- TOP TRAJETS -->
+<div class="stat-panel" style="margin-top: 20px;">
+    <h3 class="panel-title">🏆 Top 3 trajets les mieux notés</h3>
+    <div id="top-trajets"></div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function renderStars(note) {
+    return Array.from({length: 5}, (_, i) =>
+        `<span class="${i < Math.round(note) ? 'star filled' : 'star'}">★</span>`
+    ).join('');
+}
+
+fetch('/api/statistiques')
+    .then(r => r.json())
+    .then(d => {
+        const data = d.data;
+
+        // Stats globales
+        document.getElementById('stats-global').innerHTML = `
+            <div class="stat-box highlight">
+                <div class="stat-num">${data.global.note_moyenne || '—'}</div>
+                <div class="stat-lbl">Note moyenne globale</div>
+                <div class="stars" style="justify-content:center">${data.global.note_moyenne ? renderStars(Math.round(data.global.note_moyenne)) : ''}</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-num">${data.global.total_avis}</div>
+                <div class="stat-lbl">Total avis</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-num">${data.reponses.total_reponses}</div>
+                <div class="stat-lbl">Réponses données</div>
+            </div>
+        `;
+
+        // Répartition
+        const maxRep = Math.max(...data.repartition.map(r => r.nombre), 1);
+        document.getElementById('repartition').innerHTML = [...data.repartition].reverse().map(r => `
+            <div class="rep-row">
+                <span class="rep-label">${'★'.repeat(r.note)}${'☆'.repeat(5 - r.note)}</span>
+                <div class="rep-bar-wrap">
+                    <div class="rep-bar" style="width: ${(r.nombre / maxRep * 100)}%"></div>
+                </div>
+                <span class="rep-count">${r.nombre}</span>
+            </div>
+        `).join('') || '<p class="empty">Pas encore de données.</p>';
+
+        // Moyennes par critère
+        const m = data.moyennes;
+        const criteres = [
+            { label: '🚌 Trajet',    val: m.moy_trajet },
+            { label: '🚐 Bus',       val: m.moy_bus },
+            { label: '🏢 Agence',    val: m.moy_agence },
+            { label: '👤 Chauffeur', val: m.moy_chauffeur }
+        ];
+        const maxMoy = 5;
+        document.getElementById('moyennes').innerHTML = criteres.map(c => `
+            <div class="rep-row">
+                <span class="rep-label" style="min-width:110px">${c.label}</span>
+                <div class="rep-bar-wrap">
+                    <div class="rep-bar" style="width: ${c.val ? (c.val / maxMoy * 100) : 0}%; background: var(--accent)"></div>
+                </div>
+                <span class="rep-count">${c.val || '—'}</span>
+            </div>
+        `).join('') || '<p class="empty">Pas encore de données.</p>';
+
+        // Top trajets
+        document.getElementById('top-trajets').innerHTML = data.top_trajets.length
+            ? data.top_trajets.map((t, i) => `
+                <div class="top-item">
+                    <div class="top-rank">${['🥇','🥈','🥉'][i]}</div>
+                    <div class="top-info">
+                        <div class="top-route">${t.depart} → ${t.arrivee}</div>
+                        <div class="stars small">${renderStars(t.note_moyenne)}</div>
+                        <span style="font-size:12px;color:var(--text-muted)">${t.nb_avis} avis</span>
+                    </div>
+                    <div class="top-note">${t.note_moyenne}<span>/5</span></div>
+                </div>
+            `).join('')
+            : '<p class="empty">Pas encore de données.</p>';
+    });
+</script>
+{% endblock %}
