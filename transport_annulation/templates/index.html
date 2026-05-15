@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Annulation de Reservation</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .container { max-width: 950px; margin: 0 auto; }
+
+        .header { text-align: center; margin-bottom: 40px; }
+        .header h1 { color: white; font-size: 36px; font-weight: 700; }
+        .header p  { color: rgba(255,255,255,0.8); font-size: 16px; margin-top: 8px; }
+
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 35px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+            margin-bottom: 30px;
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .search-box { display: flex; gap: 15px; align-items: center; }
+
+        input {
+            flex: 1;
+            padding: 15px 20px;
+            border: 2px solid #e8e8e8;
+            border-radius: 12px;
+            font-size: 16px;
+            font-family: 'Poppins', sans-serif;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+        input:focus { border-color: #667eea; }
+
+        .btn {
+            padding: 15px 30px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102,126,234,0.5);
+        }
+
+        .badge {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 3px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            margin-left: 10px;
+        }
+
+        table { width: 100%; border-collapse: collapse; }
+
+        thead tr { background: linear-gradient(135deg, #667eea, #764ba2); }
+        th {
+            padding: 15px;
+            color: white;
+            font-weight: 600;
+            font-size: 14px;
+            text-align: center;
+        }
+        th:first-child { border-radius: 10px 0 0 10px; }
+        th:last-child  { border-radius: 0 10px 10px 0; }
+
+        td {
+            padding: 15px;
+            text-align: center;
+            font-size: 14px;
+            color: #555;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        tr:hover td { background-color: #f8f7ff; }
+
+        .statut-confirmee {
+            background: #e8f5e9; color: #2e7d32;
+            padding: 5px 12px; border-radius: 20px;
+            font-weight: 600; font-size: 12px;
+        }
+        .statut-annulee {
+            background: #ffebee; color: #c62828;
+            padding: 5px 12px; border-radius: 20px;
+            font-weight: 600; font-size: 12px;
+        }
+        .statut-en_attente {
+            background: #fff8e1; color: #f57f17;
+            padding: 5px 12px; border-radius: 20px;
+            font-weight: 600; font-size: 12px;
+        }
+
+        .rembourse {
+            background: #e8f5e9; color: #2e7d32;
+            padding: 5px 12px; border-radius: 20px;
+            font-weight: 600; font-size: 12px;
+        }
+
+        .btn-annuler {
+            background: linear-gradient(135deg, #ff416c, #ff4b2b);
+            color: white; border: none;
+            padding: 8px 18px; border-radius: 8px;
+            font-family: 'Poppins', sans-serif;
+            font-size: 13px; font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .btn-annuler:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255,65,108,0.4);
+        }
+
+        .message {
+            text-align: center;
+            padding: 20px;
+            color: #888;
+            font-size: 16px;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 30px; right: 30px;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 12px;
+            font-size: 15px; font-weight: 600;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            display: none;
+            animation: slideIn 0.3s ease;
+            max-width: 350px;
+        }
+        @keyframes slideIn {
+            from { transform: translateX(100px); opacity: 0; }
+            to   { transform: translateX(0); opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <div class="header">
+        <h1>🚌 Annulation de Reservation</h1>
+        <p>Gerez vos reservations de transport facilement</p>
+    </div>
+
+    <div class="card">
+        <div class="card-title">🔍 Rechercher vos reservations</div>
+        <div class="search-box">
+            <input type="number" id="id_client" placeholder="Entrez votre ID client..." />
+            <button class="btn" onclick="chargerReservations()">Rechercher</button>
+        </div>
+    </div>
+
+    <div class="card" id="results-card" style="display:none;">
+        <div class="card-title">
+            📋 Mes Reservations
+            <span class="badge" id="compteur">0</span>
+        </div>
+        <div id="contenu"></div>
+    </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+    function chargerReservations() {
+        const id_client = document.getElementById('id_client').value;
+        if (!id_client) {
+            alert('Veuillez entrer un ID client');
+            return;
+        }
+
+        fetch(`/api/clients/${id_client}/reservations`)
+            .then(r => r.json())
+            .then(data => {
+                const card     = document.getElementById('results-card');
+                const contenu  = document.getElementById('contenu');
+                const compteur = document.getElementById('compteur');
+
+                card.style.display = 'block';
+                compteur.textContent = data.length;
+
+                if (data.length === 0) {
+                    contenu.innerHTML = '<div class="message">Aucune reservation trouvee.</div>';
+                    return;
+                }
+
+                let html = `<table>
+                    <thead>
+                        <tr>
+                            <th>Trajet</th>
+                            <th>Place</th>
+                            <th>Date</th>
+                            <th>Periode</th>
+                            <th>Prix</th>
+                            <th>Statut</th>
+                            <th>Remboursement</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>`;
+
+                data.forEach(r => {
+
+                    let remboursement = '—';
+                    if (r.statut === 'annulee' && r.etait_confirmee === 1) {
+                        remboursement = `<span class="rembourse">💰 Rembourse: ${r.prix} MRU</span>`;
+                    }
+
+                    html += `
+                    <tr id="ligne-${r.id_reservation}">
+                        <td>🏙️ ${r.ville_depart} → ${r.ville_arrivee}</td>
+                        <td>💺 ${r.numero_place}</td>
+                        <td>${r.date_trajet}</td>
+                        <td>${r.periode}</td>
+                        <td><strong>${r.prix} MRU</strong></td>
+                        <td><span class="statut-${r.statut}">${r.statut}</span></td>
+                        <td>${remboursement}</td>
+                        <td>${r.statut !== 'annulee' ?
+                            `<button class="btn-annuler" onclick="annuler(${r.id_reservation})">Annuler</button>`
+                            : '—'}</td>
+                    </tr>`;
+                });
+
+                html += '</tbody></table>';
+                contenu.innerHTML = html;
+            });
+    }
+
+    function annuler(id_reservation) {
+        if (!confirm('Voulez-vous vraiment annuler cette reservation ?')) return;
+
+        fetch(`/api/reservations/${id_reservation}/annuler`, { method: 'PUT' })
+            .then(r => r.json())
+            .then(data => {
+                const toast = document.getElementById('toast');
+
+                if (data.rembourse) {
+                    toast.style.background = '#2e7d32';
+                    toast.innerHTML = `💰 Reservation annulee — Remboursement de ${data.montant} MRU en cours`;
+                } else {
+                    toast.style.background = '#f57f17';
+                    toast.innerHTML = '✅ Reservation annulee avec succes';
+                }
+
+                toast.style.display = 'block';
+                setTimeout(() => toast.style.display = 'none', 4000);
+                chargerReservations();
+            });
+    }
+</script>
+
+</body>
+</html>
