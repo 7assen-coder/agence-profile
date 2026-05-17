@@ -1,0 +1,6 @@
+#include<stdio.h>
+struct etudiants
+{
+    innt id;
+    etudiants *suivant;
+}

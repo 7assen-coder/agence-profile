@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% block title %}Connexion - TransportPro{% endblock %}
+
+{% block auth_content %}
+<style>
+body { display:flex; align-items:center; justify-content:center; min-height:100vh;
+  background: linear-gradient(135deg,#4f46e5 0%, #06b6d4 100%); }
+.login-card { background:white; padding:40px; border-radius:20px; width:420px; max-width:92%;
+  box-shadow:0 25px 60px rgba(0,0,0,0.25); }
+.brand-circle { width:72px;height:72px;margin:0 auto 18px;
+  background:linear-gradient(135deg,#4f46e5,#06b6d4); border-radius:50%;
+  display:flex;align-items:center;justify-content:center; color:white;font-size:1.8rem;}
+</style>
+<div class="login-card">
+    <div class="brand-circle"><i class="fas fa-bus"></i></div>
+    <h3 style="text-align:center;font-weight:800;margin-bottom:6px;">TransportPro</h3>
+    <p style="text-align:center;color:#64748b;margin-bottom:28px;">Espace Agent</p>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% for cat, msg in messages %}
+            <div class="flash-msg flash-{{ cat }}">{{ msg }}</div>
+        {% endfor %}
+    {% endwith %}
+
+    <form method="POST" class="form-modern">
+        <div style="margin-bottom:14px;">
+            <label><i class="fas fa-envelope"></i> Email</label>
+            <input type="email" name="email" required placeholder="agent@transport.com">
+        </div>
+        <div style="margin-bottom:18px;">
+            <label><i class="fas fa-lock"></i> Mot de passe</label>
+            <input type="password" name="password" required placeholder="••••••••">
+        </div>
+        <button class="btn-modern btn-primary-m" style="width:100%;justify-content:center;padding:13px;">
+            <i class="fas fa-arrow-right-to-bracket"></i> Se connecter
+        </button>
+    </form>
+    <p style="text-align:center;color:#94a3b8;font-size:0.8rem;margin-top:22px;">
+        Compte test : admin@transport.com / admin123
+    </p>
+</div>
+{% endblock %}
