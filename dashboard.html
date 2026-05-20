@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Transport Mauritanie — Groupe 30</title>
+<title>TransportMR — Groupe 30</title>
 <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Sora:wght@300;400;600;700&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -13,7 +13,6 @@
     --libre: #10b981;
     --bloquee: #f59e0b;
     --confirmee: #3b82f6;
-    --annulee: #374151;
     --text: #f1f5f9;
     --muted: #64748b;
     --accent: #6366f1;
@@ -26,10 +25,8 @@
     color: var(--text);
     font-family: 'Sora', sans-serif;
     min-height: 100vh;
-    overflow-x: hidden;
   }
 
-  /* Background pattern */
   body::before {
     content: '';
     position: fixed;
@@ -38,137 +35,149 @@
       radial-gradient(ellipse at 20% 20%, rgba(99,102,241,0.08) 0%, transparent 60%),
       radial-gradient(ellipse at 80% 80%, rgba(16,185,129,0.06) 0%, transparent 60%);
     pointer-events: none;
+    z-index: 0;
   }
 
-  header {
-    padding: 2rem 2.5rem 1.5rem;
-    border-bottom: 1px solid var(--border);
+  /* SIDEBAR */
+  .layout { display: flex; min-height: 100vh; }
+
+  .sidebar {
+    width: 240px;
+    background: #0d1424;
+    border-right: 1px solid var(--border);
+    padding: 1.5rem 1rem;
     display: flex;
-    align-items: center;
-    justify-content: space-between;
-    backdrop-filter: blur(10px);
-    position: sticky;
-    top: 0;
+    flex-direction: column;
+    gap: 0.5rem;
+    position: fixed;
+    top: 0; left: 0; bottom: 0;
     z-index: 10;
-    background: rgba(10,14,26,0.85);
   }
 
-  .logo {
+  .sidebar-logo {
     display: flex;
     align-items: center;
     gap: 0.75rem;
+    padding: 0.75rem;
+    margin-bottom: 1rem;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 1.5rem;
   }
 
-  .logo-icon {
-    width: 40px;
-    height: 40px;
+  .sidebar-logo .icon {
+    width: 38px; height: 38px;
     background: linear-gradient(135deg, var(--accent), var(--libre));
     border-radius: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.2rem;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.1rem;
   }
 
-  .logo h1 {
+  .sidebar-logo h1 {
     font-family: 'Space Mono', monospace;
-    font-size: 1rem;
-    font-weight: 700;
-    letter-spacing: 0.05em;
+    font-size: 0.9rem;
+    line-height: 1.2;
   }
 
-  .logo span {
+  .sidebar-logo span {
     display: block;
-    font-size: 0.65rem;
+    font-size: 0.6rem;
     color: var(--muted);
     font-family: 'Sora', sans-serif;
-    font-weight: 300;
   }
 
-  .badge {
-    background: rgba(99,102,241,0.15);
-    border: 1px solid rgba(99,102,241,0.3);
-    color: #a5b4fc;
-    padding: 0.35rem 0.9rem;
-    border-radius: 999px;
-    font-size: 0.72rem;
-    font-family: 'Space Mono', monospace;
-  }
-
-  main {
-    max-width: 1100px;
-    margin: 0 auto;
-    padding: 2.5rem 2rem;
-  }
-
-  /* Trajet selector */
-  .trajet-bar {
+  .nav-item {
     display: flex;
     align-items: center;
-    gap: 1rem;
-    margin-bottom: 2.5rem;
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    padding: 1.25rem 1.5rem;
-  }
-
-  .trajet-bar label {
-    font-size: 0.8rem;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 0.85rem;
     color: var(--muted);
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    white-space: nowrap;
+    transition: all 0.2s;
+    border: 1px solid transparent;
   }
 
-  .trajet-bar select {
+  .nav-item:hover { background: rgba(255,255,255,0.04); color: var(--text); }
+  .nav-item.active {
+    background: rgba(99,102,241,0.15);
+    border-color: rgba(99,102,241,0.3);
+    color: #a5b4fc;
+  }
+
+  .nav-item .nav-icon { font-size: 1rem; width: 20px; text-align: center; }
+
+  .sidebar-bottom {
+    margin-top: auto;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border);
+    font-size: 0.7rem;
+    color: var(--muted);
+    text-align: center;
+    line-height: 1.6;
+  }
+
+  /* MAIN CONTENT */
+  .main {
+    margin-left: 240px;
     flex: 1;
+    padding: 2rem;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* PAGE HEADER */
+  .page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 2rem;
+  }
+
+  .page-title { font-size: 1.4rem; font-weight: 700; }
+  .page-sub { font-size: 0.8rem; color: var(--muted); margin-top: 0.2rem; }
+
+  .header-actions { display: flex; gap: 0.75rem; align-items: center; }
+
+  .btn {
+    padding: 0.6rem 1.2rem;
+    border-radius: 8px;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.75rem;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s;
+  }
+
+  .btn-primary { background: var(--accent); color: white; }
+  .btn-primary:hover { opacity: 0.85; }
+  .btn-ghost {
     background: rgba(255,255,255,0.05);
     border: 1px solid var(--border);
-    color: var(--text);
-    padding: 0.6rem 1rem;
-    border-radius: 8px;
-    font-family: 'Sora', sans-serif;
-    font-size: 0.9rem;
-    cursor: pointer;
-    outline: none;
+    color: var(--muted);
   }
+  .btn-ghost:hover { color: var(--text); }
 
-  .btn-refresh {
-    background: var(--accent);
-    color: white;
-    border: none;
-    padding: 0.65rem 1.4rem;
-    border-radius: 8px;
-    font-family: 'Space Mono', monospace;
-    font-size: 0.78rem;
-    cursor: pointer;
-    transition: all 0.2s;
-    white-space: nowrap;
-  }
+  /* SECTION */
+  .section { display: none; }
+  .section.active { display: block; }
 
-  .btn-refresh:hover { opacity: 0.85; transform: translateY(-1px); }
-
-  /* Stats row */
-  .stats {
+  /* STATS GRID */
+  .stats-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     gap: 1rem;
-    margin-bottom: 2.5rem;
+    margin-bottom: 1.5rem;
   }
 
   .stat-card {
     background: var(--card);
     border: 1px solid var(--border);
     border-radius: 14px;
-    padding: 1.4rem;
+    padding: 1.3rem;
     position: relative;
     overflow: hidden;
-    transition: transform 0.2s;
   }
-
-  .stat-card:hover { transform: translateY(-2px); }
 
   .stat-card::before {
     content: '';
@@ -178,444 +187,499 @@
     border-radius: 14px 14px 0 0;
   }
 
-  .stat-card.libre::before   { background: var(--libre); }
-  .stat-card.bloquee::before { background: var(--bloquee); }
-  .stat-card.confirmee::before { background: var(--confirmee); }
-  .stat-card.total::before   { background: var(--accent); }
+  .stat-card.s1::before { background: var(--libre); }
+  .stat-card.s2::before { background: var(--bloquee); }
+  .stat-card.s3::before { background: var(--confirmee); }
+  .stat-card.s4::before { background: var(--accent); }
 
-  .stat-label {
-    font-size: 0.72rem;
-    color: var(--muted);
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    font-weight: 600;
-    margin-bottom: 0.6rem;
-  }
+  .stat-label { font-size: 0.7rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.5rem; }
+  .stat-value { font-family: 'Space Mono', monospace; font-size: 2rem; font-weight: 700; }
+  .stat-card.s1 .stat-value { color: var(--libre); }
+  .stat-card.s2 .stat-value { color: var(--bloquee); }
+  .stat-card.s3 .stat-value { color: var(--confirmee); }
+  .stat-card.s4 .stat-value { color: #a5b4fc; }
+  .stat-trend { font-size: 0.72rem; color: var(--muted); margin-top: 0.4rem; }
 
-  .stat-value {
-    font-family: 'Space Mono', monospace;
-    font-size: 2.2rem;
-    font-weight: 700;
-    line-height: 1;
-  }
+  /* GRID 2 COL */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem; }
 
-  .stat-card.libre   .stat-value { color: var(--libre); }
-  .stat-card.bloquee .stat-value { color: var(--bloquee); }
-  .stat-card.confirmee .stat-value { color: var(--confirmee); }
-  .stat-card.total   .stat-value { color: #a5b4fc; }
-
-  /* Bus layout */
-  .bus-section {
+  /* CARD */
+  .card {
     background: var(--card);
     border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 2rem;
-    margin-bottom: 2rem;
+    border-radius: 14px;
+    padding: 1.5rem;
   }
 
-  .section-title {
+  .card-title {
     font-size: 0.78rem;
     text-transform: uppercase;
-    letter-spacing: 0.12em;
+    letter-spacing: 0.1em;
     color: var(--muted);
     font-weight: 600;
-    margin-bottom: 1.8rem;
+    margin-bottom: 1.2rem;
     display: flex;
     align-items: center;
-    gap: 0.6rem;
+    justify-content: space-between;
   }
 
-  .section-title::after {
-    content: '';
+  /* TABLE */
+  table { width: 100%; border-collapse: collapse; }
+  th {
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    text-align: left;
+    padding: 0.5rem 0.75rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  td {
+    padding: 0.75rem;
+    font-size: 0.83rem;
+    border-bottom: 1px solid rgba(30,45,69,0.5);
+  }
+
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: rgba(255,255,255,0.02); }
+
+  /* BADGES */
+  .badge {
+    display: inline-block;
+    padding: 0.2rem 0.6rem;
+    border-radius: 999px;
+    font-size: 0.68rem;
+    font-weight: 600;
+  }
+
+  .badge-libre     { background: rgba(16,185,129,0.15); color: var(--libre); }
+  .badge-bloquee   { background: rgba(245,158,11,0.15); color: var(--bloquee); }
+  .badge-confirmee { background: rgba(59,130,246,0.15); color: var(--confirmee); }
+  .badge-matin     { background: rgba(99,102,241,0.15); color: #a5b4fc; }
+  .badge-apresmidi { background: rgba(236,72,153,0.15); color: #f9a8d4; }
+
+  /* PROGRESS BAR */
+  .progress-bar {
+    height: 6px;
+    background: rgba(255,255,255,0.06);
+    border-radius: 999px;
+    overflow: hidden;
+    margin-top: 0.5rem;
+  }
+
+  .progress-fill {
+    height: 100%;
+    border-radius: 999px;
+    background: var(--libre);
+    transition: width 0.5s;
+  }
+
+  /* TRAJET SELECTOR */
+  .trajet-bar {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 1rem 1.5rem;
+  }
+
+  .trajet-bar label { font-size: 0.75rem; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; white-space: nowrap; }
+
+  .trajet-bar select {
     flex: 1;
-    height: 1px;
-    background: var(--border);
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 0.55rem 1rem;
+    border-radius: 8px;
+    font-family: 'Sora', sans-serif;
+    font-size: 0.88rem;
+    cursor: pointer;
+    outline: none;
   }
 
-  /* Bus shape */
+  /* BUS GRID */
   .bus-wrapper {
     background: rgba(255,255,255,0.02);
     border: 2px solid var(--border);
-    border-radius: 20px;
-    padding: 2rem 1.5rem;
-    position: relative;
+    border-radius: 16px;
+    padding: 1.5rem;
   }
 
-  .bus-front {
-    text-align: center;
-    font-size: 0.7rem;
-    color: var(--muted);
-    margin-bottom: 1.5rem;
-    font-family: 'Space Mono', monospace;
-    letter-spacing: 0.1em;
-  }
+  .bus-front { text-align: center; font-size: 0.68rem; color: var(--muted); margin-bottom: 1.2rem; font-family: 'Space Mono', monospace; }
 
   .seats-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: 0.8rem;
-    max-width: 380px;
+    gap: 0.6rem;
+    max-width: 320px;
     margin: 0 auto;
   }
 
   .seat {
     aspect-ratio: 1;
-    border-radius: 10px;
+    border-radius: 8px;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    transition: all 0.25s;
+    transition: all 0.2s;
     border: 2px solid transparent;
-    position: relative;
     font-family: 'Space Mono', monospace;
-    font-size: 0.85rem;
+    font-size: 0.8rem;
     font-weight: 700;
   }
 
   .seat:hover { transform: scale(1.08); }
+  .seat.libre { background: rgba(16,185,129,0.1); border-color: rgba(16,185,129,0.4); color: var(--libre); }
+  .seat.libre:hover { background: rgba(16,185,129,0.2); border-color: var(--libre); box-shadow: 0 0 12px rgba(16,185,129,0.3); }
+  .seat.bloquee { background: rgba(245,158,11,0.1); border-color: rgba(245,158,11,0.4); color: var(--bloquee); cursor: not-allowed; }
+  .seat.confirmee { background: rgba(59,130,246,0.1); border-color: rgba(59,130,246,0.4); color: var(--confirmee); cursor: not-allowed; }
+  .seat.aisle { background: transparent; border: none; cursor: default; pointer-events: none; }
+  .seat .timer { font-size: 0.5rem; font-family: 'Sora', sans-serif; margin-top: 2px; }
 
-  .seat.libre {
-    background: rgba(16,185,129,0.1);
-    border-color: rgba(16,185,129,0.4);
-    color: var(--libre);
-  }
+  .legend { display: flex; gap: 1.2rem; margin-top: 1.2rem; justify-content: center; flex-wrap: wrap; }
+  .legend-item { display: flex; align-items: center; gap: 0.4rem; font-size: 0.72rem; color: var(--muted); }
+  .legend-dot { width: 8px; height: 8px; border-radius: 2px; }
 
-  .seat.libre:hover {
-    background: rgba(16,185,129,0.2);
-    border-color: var(--libre);
-    box-shadow: 0 0 16px rgba(16,185,129,0.3);
-  }
+  /* TRAJET INFO */
+  .info-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem; margin-bottom: 1.2rem; }
+  .info-chip { background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 10px; padding: 0.75rem 1rem; }
+  .info-chip .label { font-size: 0.65rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.2rem; }
+  .info-chip .value { font-family: 'Space Mono', monospace; font-size: 0.88rem; font-weight: 700; }
 
-  .seat.bloquee {
-    background: rgba(245,158,11,0.1);
-    border-color: rgba(245,158,11,0.4);
-    color: var(--bloquee);
-    cursor: not-allowed;
-  }
+  /* MINI STATS */
+  .mini-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.75rem; margin-bottom: 1.2rem; }
+  .mini-stat { background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 10px; padding: 0.75rem; text-align: center; }
+  .mini-stat .val { font-family: 'Space Mono', monospace; font-size: 1.4rem; font-weight: 700; }
+  .mini-stat .lbl { font-size: 0.65rem; color: var(--muted); text-transform: uppercase; }
 
-  .seat.confirmee {
-    background: rgba(59,130,246,0.1);
-    border-color: rgba(59,130,246,0.4);
-    color: var(--confirmee);
-    cursor: not-allowed;
-  }
-
-  .seat .timer {
-    font-size: 0.55rem;
-    font-family: 'Sora', sans-serif;
-    margin-top: 2px;
-    opacity: 0.8;
-  }
-
-  /* Aisle spacer */
-  .seat.aisle {
-    background: transparent;
-    border: none;
-    cursor: default;
-    pointer-events: none;
-  }
-
-  /* Légende */
-  .legend {
-    display: flex;
-    gap: 1.5rem;
-    margin-top: 1.5rem;
-    justify-content: center;
-    flex-wrap: wrap;
-  }
-
-  .legend-item {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    font-size: 0.78rem;
-    color: var(--muted);
-  }
-
-  .legend-dot {
-    width: 10px;
-    height: 10px;
-    border-radius: 3px;
-  }
-
-  /* Modal */
-  .modal-overlay {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.7);
-    backdrop-filter: blur(4px);
-    z-index: 100;
-    align-items: center;
-    justify-content: center;
-  }
-
+  /* MODAL */
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(4px); z-index: 100; align-items: center; justify-content: center; }
   .modal-overlay.active { display: flex; }
 
-  .modal {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 20px;
-    padding: 2.5rem;
-    width: 100%;
-    max-width: 420px;
-    animation: slideUp 0.3s ease;
-  }
+  .modal { background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 2rem; width: 100%; max-width: 400px; animation: slideUp 0.3s ease; }
 
-  @keyframes slideUp {
-    from { transform: translateY(20px); opacity: 0; }
-    to   { transform: translateY(0);    opacity: 1; }
-  }
+  @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
-  .modal h2 {
-    font-size: 1.2rem;
-    margin-bottom: 0.5rem;
-  }
+  .modal h2 { font-size: 1.1rem; margin-bottom: 0.3rem; }
+  .modal p { color: var(--muted); font-size: 0.82rem; margin-bottom: 1.5rem; }
 
-  .modal p {
-    color: var(--muted);
-    font-size: 0.85rem;
-    margin-bottom: 2rem;
-  }
+  .modal-field { margin-bottom: 1rem; }
+  .modal-field label { display: block; font-size: 0.72rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.4rem; }
+  .modal-field input, .modal-field select { width: 100%; background: rgba(255,255,255,0.05); border: 1px solid var(--border); color: var(--text); padding: 0.65rem 0.9rem; border-radius: 8px; font-family: 'Sora', sans-serif; font-size: 0.88rem; outline: none; }
+  .modal-field select option { background: #111827; }
 
-  .modal-field {
-    margin-bottom: 1.2rem;
-  }
+  .modal-actions { display: flex; gap: 0.75rem; margin-top: 1.5rem; }
+  .btn-cancel { flex: 1; background: rgba(255,255,255,0.05); border: 1px solid var(--border); color: var(--muted); padding: 0.65rem; border-radius: 8px; font-family: 'Sora', sans-serif; cursor: pointer; }
+  .btn-confirm { flex: 2; background: var(--libre); border: none; color: white; padding: 0.65rem; border-radius: 8px; font-family: 'Space Mono', monospace; font-size: 0.8rem; cursor: pointer; }
 
-  .modal-field label {
-    display: block;
-    font-size: 0.75rem;
-    color: var(--muted);
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    margin-bottom: 0.5rem;
-  }
+  /* TOAST */
+  .toast { position: fixed; bottom: 2rem; right: 2rem; padding: 0.9rem 1.3rem; border-radius: 10px; font-size: 0.83rem; z-index: 999; transform: translateY(100px); opacity: 0; transition: all 0.3s; max-width: 300px; }
+  .toast.show { transform: translateY(0); opacity: 1; }
+  .toast.success { background: rgba(16,185,129,0.2); border: 1px solid rgba(16,185,129,0.4); color: var(--libre); }
+  .toast.error { background: rgba(239,68,68,0.2); border: 1px solid rgba(239,68,68,0.4); color: #f87171; }
 
-  .modal-field input, .modal-field select {
-    width: 100%;
-    background: rgba(255,255,255,0.05);
-    border: 1px solid var(--border);
-    color: var(--text);
-    padding: 0.75rem 1rem;
-    border-radius: 10px;
-    font-family: 'Sora', sans-serif;
-    font-size: 0.9rem;
-    outline: none;
-    transition: border-color 0.2s;
-  }
-
-  .modal-field input:focus, .modal-field select:focus {
-    border-color: var(--accent);
-  }
-
-  .modal-actions {
-    display: flex;
-    gap: 1rem;
-    margin-top: 2rem;
-  }
-
-  .btn-cancel {
-    flex: 1;
-    background: rgba(255,255,255,0.05);
-    border: 1px solid var(--border);
-    color: var(--muted);
-    padding: 0.75rem;
-    border-radius: 10px;
-    font-family: 'Sora', sans-serif;
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-
-  .btn-confirm {
-    flex: 2;
-    background: var(--libre);
-    border: none;
-    color: white;
-    padding: 0.75rem;
-    border-radius: 10px;
-    font-family: 'Space Mono', monospace;
-    font-size: 0.85rem;
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-
-  .btn-confirm:hover { opacity: 0.85; }
-
-  /* Toast */
-  .toast {
-    position: fixed;
-    bottom: 2rem;
-    right: 2rem;
-    padding: 1rem 1.5rem;
-    border-radius: 12px;
-    font-size: 0.85rem;
-    z-index: 999;
-    transform: translateY(100px);
-    opacity: 0;
-    transition: all 0.3s;
-    max-width: 320px;
-  }
-
-  .toast.show {
-    transform: translateY(0);
-    opacity: 1;
-  }
-
-  .toast.success {
-    background: rgba(16,185,129,0.2);
-    border: 1px solid rgba(16,185,129,0.4);
-    color: var(--libre);
-  }
-
-  .toast.error {
-    background: rgba(239,68,68,0.2);
-    border: 1px solid rgba(239,68,68,0.4);
-    color: #f87171;
-  }
-
-  /* Trajet info */
-  .trajet-info {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 1rem;
-    margin-bottom: 2rem;
-  }
-
-  .info-chip {
-    background: rgba(255,255,255,0.03);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 0.9rem 1.2rem;
-  }
-
-  .info-chip .label {
-    font-size: 0.68rem;
-    color: var(--muted);
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    margin-bottom: 0.3rem;
-  }
-
-  .info-chip .value {
-    font-family: 'Space Mono', monospace;
-    font-size: 0.95rem;
-    font-weight: 700;
-  }
-
-  .spinner {
-    display: inline-block;
-    width: 16px;
-    height: 16px;
-    border: 2px solid rgba(255,255,255,0.2);
-    border-top-color: white;
-    border-radius: 50%;
-    animation: spin 0.6s linear infinite;
-  }
-
+  .spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid rgba(255,255,255,0.2); border-top-color: white; border-radius: 50%; animation: spin 0.6s linear infinite; }
   @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* AVATAR */
+  .avatar { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 700; }
+
+  /* CHART BAR */
+  .chart-bars { display: flex; align-items: flex-end; gap: 0.5rem; height: 80px; margin-top: 1rem; }
+  .bar { flex: 1; border-radius: 4px 4px 0 0; min-height: 4px; transition: height 0.5s; position: relative; }
+  .bar-label { font-size: 0.6rem; color: var(--muted); text-align: center; margin-top: 0.3rem; }
+
+  .dot-online { width: 8px; height: 8px; background: var(--libre); border-radius: 50%; display: inline-block; animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
 </style>
 </head>
 <body>
+<div class="layout">
 
-<header>
-  <div class="logo">
-    <div class="logo-icon">🚌</div>
-    <h1>TransportMR
-      <span>Plateforme de réservation · Groupe 30</span>
-    </h1>
-  </div>
-  <div class="badge">API Flask · MySQL · Groupe 30</div>
-</header>
-
-<main>
-
-  <!-- Sélecteur de trajet -->
-  <div class="trajet-bar">
-    <label>Trajet</label>
-    <select id="trajet-select">
-      <option value="1">Trajet #1 — Nouakchott → Nouadhibou · 10 Mai 2026 · Matin</option>
-    </select>
-    <button class="btn-refresh" onclick="chargerDisponibilites()">↻ Actualiser</button>
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="icon">🚌</div>
+    <h1>TransportMR<span>Groupe 30 · API Flask</span></h1>
   </div>
 
-  <!-- Infos trajet -->
-  <div class="trajet-info" id="trajet-info">
-    <div class="info-chip">
-      <div class="label">Date</div>
-      <div class="value" id="info-date">—</div>
-    </div>
-    <div class="info-chip">
-      <div class="label">Prix</div>
-      <div class="value" id="info-prix">—</div>
-    </div>
-    <div class="info-chip">
-      <div class="label">Période</div>
-      <div class="value" id="info-periode">—</div>
-    </div>
+  <div class="nav-item active" onclick="showSection('dashboard')">
+    <span class="nav-icon">📊</span> Dashboard
+  </div>
+  <div class="nav-item" onclick="showSection('reservation')">
+    <span class="nav-icon">🪑</span> Réservations
+  </div>
+  <div class="nav-item" onclick="showSection('trajets')">
+    <span class="nav-icon">🗺️</span> Trajets
+  </div>
+  <div class="nav-item" onclick="showSection('clients')">
+    <span class="nav-icon">👥</span> Clients
+  </div>
+  <div class="nav-item" onclick="showSection('agences')">
+    <span class="nav-icon">🏢</span> Agences
   </div>
 
-  <!-- Stats -->
-  <div class="stats">
-    <div class="stat-card libre">
-      <div class="stat-label">Places libres</div>
-      <div class="stat-value" id="stat-libres">—</div>
-    </div>
-    <div class="stat-card bloquee">
-      <div class="stat-label">Bloquées</div>
-      <div class="stat-value" id="stat-bloquees">—</div>
-    </div>
-    <div class="stat-card confirmee">
-      <div class="stat-label">Confirmées</div>
-      <div class="stat-value" id="stat-confirmees">—</div>
-    </div>
-    <div class="stat-card total">
-      <div class="stat-label">Total places</div>
-      <div class="stat-value" id="stat-total">—</div>
-    </div>
+  <div class="sidebar-bottom">
+    <div><span class="dot-online"></span> Système actif</div>
+    <div style="margin-top:0.3rem">Groupe 30 · 251060 · 251046 · 251075</div>
   </div>
+</aside>
 
-  <!-- Grille de places -->
-  <div class="bus-section">
-    <div class="section-title">Plan du bus</div>
+<!-- MAIN -->
+<main class="main">
 
-    <div class="bus-wrapper">
-      <div class="bus-front">🚗 CONDUCTEUR</div>
-      <div class="seats-grid" id="seats-grid">
-        <div style="text-align:center;color:var(--muted);grid-column:1/-1;padding:2rem">
-          <div class="spinner"></div>
-          <p style="margin-top:1rem;font-size:0.85rem">Chargement des places...</p>
-        </div>
+  <!-- ══════════════════════════════════════════ -->
+  <!-- SECTION DASHBOARD                          -->
+  <!-- ══════════════════════════════════════════ -->
+  <section class="section active" id="section-dashboard">
+
+    <div class="page-header">
+      <div>
+        <div class="page-title">Dashboard général</div>
+        <div class="page-sub">Vue d'ensemble · Mise à jour automatique toutes les 10s</div>
       </div>
-      <div class="legend">
-        <div class="legend-item">
-          <div class="legend-dot" style="background:var(--libre)"></div>
-          Libre (cliquer pour réserver)
-        </div>
-        <div class="legend-item">
-          <div class="legend-dot" style="background:var(--bloquee)"></div>
-          Bloquée (en attente de paiement)
-        </div>
-        <div class="legend-item">
-          <div class="legend-dot" style="background:var(--confirmee)"></div>
-          Confirmée (vendue)
-        </div>
+      <div class="header-actions">
+        <button class="btn btn-ghost" onclick="chargerDashboard()">↻ Actualiser</button>
       </div>
     </div>
-  </div>
+
+    <!-- Stats globales -->
+    <div class="stats-grid">
+      <div class="stat-card s1">
+        <div class="stat-label">Places libres</div>
+        <div class="stat-value" id="d-libres">—</div>
+        <div class="stat-trend">Sur tous les trajets</div>
+      </div>
+      <div class="stat-card s2">
+        <div class="stat-label">Bloquées</div>
+        <div class="stat-value" id="d-bloquees">—</div>
+        <div class="stat-trend">En attente de paiement</div>
+      </div>
+      <div class="stat-card s3">
+        <div class="stat-label">Confirmées</div>
+        <div class="stat-value" id="d-confirmees">—</div>
+        <div class="stat-trend">Réservations validées</div>
+      </div>
+      <div class="stat-card s4">
+        <div class="stat-label">Total places</div>
+        <div class="stat-value" id="d-total">—</div>
+        <div class="stat-trend">Tous trajets confondus</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <!-- Dernières réservations -->
+      <div class="card">
+        <div class="card-title">Dernières réservations</div>
+        <table>
+          <thead>
+            <tr>
+              <th>Client</th>
+              <th>Trajet</th>
+              <th>Place</th>
+              <th>Statut</th>
+            </tr>
+          </thead>
+          <tbody id="table-reservations">
+            <tr><td colspan="4" style="text-align:center;color:var(--muted)">Chargement...</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Taux de remplissage par trajet -->
+      <div class="card">
+        <div class="card-title">Taux de remplissage</div>
+        <div id="taux-remplissage">
+          <div style="color:var(--muted);font-size:0.83rem">Chargement...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Agences actives -->
+    <div class="card">
+      <div class="card-title">Agences partenaires</div>
+      <table>
+        <thead>
+          <tr><th>Agence</th><th>Téléphone</th><th>Email</th><th>Adresse</th><th>Bus</th></tr>
+        </thead>
+        <tbody id="table-agences-dash">
+          <tr><td colspan="5" style="color:var(--muted);text-align:center">Chargement...</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+  </section>
+
+  <!-- ══════════════════════════════════════════ -->
+  <!-- SECTION RESERVATION                        -->
+  <!-- ══════════════════════════════════════════ -->
+  <section class="section" id="section-reservation">
+
+    <div class="page-header">
+      <div>
+        <div class="page-title">Réserver une place</div>
+        <div class="page-sub">Sélectionnez un trajet puis cliquez sur une place verte</div>
+      </div>
+      <div class="header-actions">
+        <button class="btn btn-ghost" onclick="chargerDisponibilites()">↻ Actualiser</button>
+      </div>
+    </div>
+
+    <!-- Sélecteur trajet -->
+    <div class="trajet-bar">
+      <label>Trajet</label>
+      <select id="trajet-select" onchange="chargerDisponibilites()">
+        <option value="1">Trajet #1 — Nouakchott → Nouadhibou · 10 Mai · Matin · 1500 MRU</option>
+        <option value="2">Trajet #2 — Nouakchott → Rosso · 10 Mai · Matin · 800 MRU</option>
+        <option value="3">Trajet #3 — Nouakchott → Kaédi · 10 Mai · Après-midi · 1200 MRU</option>
+        <option value="4">Trajet #4 — Nouakchott → Zouerate · 11 Mai · Matin · 2500 MRU</option>
+        <option value="5">Trajet #5 — Nouakchott → Atar · 11 Mai · Après-midi · 1800 MRU</option>
+        <option value="6">Trajet #6 — Nouakchott → Tidjikja · 12 Mai · Matin · 3000 MRU</option>
+      </select>
+    </div>
+
+    <!-- Info trajet -->
+    <div class="info-row">
+      <div class="info-chip"><div class="label">Date</div><div class="value" id="info-date">—</div></div>
+      <div class="info-chip"><div class="label">Prix</div><div class="value" id="info-prix">—</div></div>
+      <div class="info-chip"><div class="label">Période</div><div class="value" id="info-periode">—</div></div>
+    </div>
+
+    <!-- Mini stats -->
+    <div class="mini-stats">
+      <div class="mini-stat"><div class="val" id="ms-libres" style="color:var(--libre)">—</div><div class="lbl">Libres</div></div>
+      <div class="mini-stat"><div class="val" id="ms-bloquees" style="color:var(--bloquee)">—</div><div class="lbl">Bloquées</div></div>
+      <div class="mini-stat"><div class="val" id="ms-confirmees" style="color:var(--confirmee)">—</div><div class="lbl">Confirmées</div></div>
+      <div class="mini-stat"><div class="val" id="ms-total" style="color:#a5b4fc">—</div><div class="lbl">Total</div></div>
+    </div>
+
+    <div class="grid-2">
+      <!-- Grille bus -->
+      <div class="card">
+        <div class="card-title">Plan du bus</div>
+        <div class="bus-wrapper">
+          <div class="bus-front">🚗 CONDUCTEUR</div>
+          <div class="seats-grid" id="seats-grid">
+            <div style="grid-column:1/-1;text-align:center;padding:1rem;color:var(--muted)">
+              <div class="spinner"></div>
+              <p style="margin-top:0.5rem;font-size:0.8rem">Chargement...</p>
+            </div>
+          </div>
+          <div class="legend">
+            <div class="legend-item"><div class="legend-dot" style="background:var(--libre)"></div>Libre</div>
+            <div class="legend-item"><div class="legend-dot" style="background:var(--bloquee)"></div>Bloquée</div>
+            <div class="legend-item"><div class="legend-dot" style="background:var(--confirmee)"></div>Confirmée</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Réservations du trajet -->
+      <div class="card">
+        <div class="card-title">Réservations de ce trajet</div>
+        <table>
+          <thead>
+            <tr><th>Place</th><th>Client</th><th>Statut</th><th>Timer</th></tr>
+          </thead>
+          <tbody id="table-trajet-resa">
+            <tr><td colspan="4" style="color:var(--muted);text-align:center">—</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- ══════════════════════════════════════════ -->
+  <!-- SECTION TRAJETS                            -->
+  <!-- ══════════════════════════════════════════ -->
+  <section class="section" id="section-trajets">
+    <div class="page-header">
+      <div>
+        <div class="page-title">Tous les trajets</div>
+        <div class="page-sub">Liste des trajets disponibles avec taux de remplissage</div>
+      </div>
+    </div>
+    <div class="card">
+      <table>
+        <thead>
+          <tr><th>#</th><th>Départ</th><th>Arrivée</th><th>Date</th><th>Période</th><th>Prix</th><th>Bus</th><th>Remplissage</th></tr>
+        </thead>
+        <tbody id="table-all-trajets">
+          <tr><td colspan="8" style="color:var(--muted);text-align:center">Chargement...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════ -->
+  <!-- SECTION CLIENTS                            -->
+  <!-- ══════════════════════════════════════════ -->
+  <section class="section" id="section-clients">
+    <div class="page-header">
+      <div>
+        <div class="page-title">Clients inscrits</div>
+        <div class="page-sub">Liste des clients avec leur historique</div>
+      </div>
+    </div>
+    <div class="card">
+      <table>
+        <thead>
+          <tr><th>Client</th><th>Téléphone</th><th>Email</th><th>CIN</th><th>Réservations</th></tr>
+        </thead>
+        <tbody id="table-clients">
+          <tr><td colspan="5" style="color:var(--muted);text-align:center">Chargement...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════ -->
+  <!-- SECTION AGENCES                            -->
+  <!-- ══════════════════════════════════════════ -->
+  <section class="section" id="section-agences">
+    <div class="page-header">
+      <div>
+        <div class="page-title">Agences de transport</div>
+        <div class="page-sub">Partenaires du réseau TransportMR</div>
+      </div>
+    </div>
+    <div class="card">
+      <table>
+        <thead>
+          <tr><th>Agence</th><th>Téléphone</th><th>Email</th><th>Adresse</th><th>Bus actifs</th><th>Trajets</th></tr>
+        </thead>
+        <tbody id="table-agences">
+          <tr><td colspan="6" style="color:var(--muted);text-align:center">Chargement...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
 
 </main>
+</div>
 
-<!-- Modal réservation -->
+<!-- MODAL -->
 <div class="modal-overlay" id="modal">
   <div class="modal">
     <h2>🪑 Réserver la place <span id="modal-place-num"></span></h2>
-    <p>Remplissez vos informations. La place sera bloquée 5 minutes le temps du paiement.</p>
+    <p>La place sera bloquée 5 minutes. Complétez le paiement avant expiration.</p>
 
     <div class="modal-field">
-      <label>ID Client</label>
-      <input type="number" id="input-client" value="1" min="1" placeholder="ID du client">
+      <label>Client</label>
+      <select id="input-client">
+        <option value="1">1 — Diallo Mamadou</option>
+        <option value="2">2 — Kane Fatima</option>
+        <option value="3">3 — Mint Ahmed Mariem</option>
+        <option value="4">4 — Ba Oumar</option>
+      </select>
     </div>
 
     <div class="modal-field">
@@ -635,99 +699,259 @@
 
     <div class="modal-actions">
       <button class="btn-cancel" onclick="fermerModal()">Annuler</button>
-      <button class="btn-confirm" onclick="confirmerReservation()">
-        ✓ Bloquer & Payer
-      </button>
+      <button class="btn-confirm" id="btn-confirm" onclick="confirmerReservation()">✓ Bloquer & Payer</button>
     </div>
   </div>
 </div>
 
-<!-- Toast -->
 <div class="toast" id="toast"></div>
 
 <script>
 const API = 'http://127.0.0.1:5000/api';
 let selectedPlace = null;
-let intervalId = null;
+let selectedPlaceNum = null;
 
-// ─── Chargement des disponibilités ───────────────────────────────────────────
+// Données statiques agences / clients / trajets
+const AGENCES = [
+  { id: 1, nom: 'Agence Sahel Transport', tel: '22 00 00 01', email: 'sahel@transport.mr', adresse: 'Nouakchott, Tevragh Zeina', bus: 4 },
+  { id: 2, nom: 'Mauritanie Express', tel: '22 00 00 10', email: 'express@mr.mr', adresse: 'Nouakchott, Ksar', bus: 3 },
+  { id: 3, nom: 'Trans-Sahara MR', tel: '22 00 00 20', email: 'sahara@mr.mr', adresse: 'Nouadhibou, Centre', bus: 2 },
+];
+
+const CLIENTS = [
+  { id: 1, nom: 'Diallo Mamadou',     tel: '22 00 00 02', email: 'mamadou@gmail.com',  cin: 'MR001234' },
+  { id: 2, nom: 'Kane Fatima',         tel: '22 00 00 03', email: 'fatima@gmail.com',   cin: 'MR001235' },
+  { id: 3, nom: 'Mint Ahmed Mariem',   tel: '22 00 00 04', email: 'mariem@gmail.com',   cin: 'MR001236' },
+  { id: 4, nom: 'Ba Oumar',            tel: '22 00 00 05', email: 'oumar@gmail.com',    cin: 'MR001237' },
+  { id: 5, nom: 'Sow Aissatou',        tel: '22 00 00 06', email: 'aissatou@gmail.com', cin: 'MR001238' },
+  { id: 6, nom: 'Ould Mohamed Ahmed',  tel: '22 00 00 07', email: 'ahmed@gmail.com',    cin: 'MR001239' },
+];
+
+const TRAJETS_INFO = {
+  1: { depart: 'Nouakchott', arrivee: 'Nouadhibou', prix: 1500 },
+  2: { depart: 'Nouakchott', arrivee: 'Rosso',      prix: 800  },
+  3: { depart: 'Nouakchott', arrivee: 'Kaédi',      prix: 1200 },
+  4: { depart: 'Nouakchott', arrivee: 'Zouerate',   prix: 2500 },
+  5: { depart: 'Nouakchott', arrivee: 'Atar',        prix: 1800 },
+  6: { depart: 'Nouakchott', arrivee: 'Tidjikja',   prix: 3000 },
+};
+
+// ─── Navigation ───────────────────────────────
+function showSection(name) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('section-' + name).classList.add('active');
+  event.currentTarget.classList.add('active');
+
+  if (name === 'dashboard')   chargerDashboard();
+  if (name === 'reservation') chargerDisponibilites();
+  if (name === 'trajets')     chargerTrajets();
+  if (name === 'clients')     chargerClients();
+  if (name === 'agences')     chargerAgences();
+}
+
+// ─── DASHBOARD ────────────────────────────────
+async function chargerDashboard() {
+  let totalL = 0, totalB = 0, totalC = 0, totalP = 0;
+  const trajetsData = [];
+
+  for (let i = 1; i <= 6; i++) {
+    try {
+      const r = await fetch(`${API}/disponibilites/${i}/resume`);
+      const d = await r.json();
+      totalL += parseInt(d.libres || 0);
+      totalB += parseInt(d.bloquees || 0);
+      totalC += parseInt(d.confirmees || 0);
+      totalP += parseInt(d.total || 0);
+      trajetsData.push({ id: i, ...d });
+    } catch(e) {}
+  }
+
+  document.getElementById('d-libres').textContent    = totalL;
+  document.getElementById('d-bloquees').textContent  = totalB;
+  document.getElementById('d-confirmees').textContent = totalC;
+  document.getElementById('d-total').textContent     = totalP;
+
+  // Taux de remplissage
+  const tr = document.getElementById('taux-remplissage');
+  tr.innerHTML = trajetsData.map(t => {
+    const info = TRAJETS_INFO[t.id] || {};
+    const conf = parseInt(t.confirmees || 0);
+    const total = parseInt(t.total || 12);
+    const pct = total > 0 ? Math.round(conf / total * 100) : 0;
+    return `
+      <div style="margin-bottom:1rem">
+        <div style="display:flex;justify-content:space-between;font-size:0.78rem;margin-bottom:0.3rem">
+          <span>${info.depart || '—'} → ${info.arrivee || '—'}</span>
+          <span style="color:var(--muted)">${conf}/${total} · ${pct}%</span>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-fill" style="width:${pct}%;background:${pct > 70 ? 'var(--bloquee)' : 'var(--libre)'}"></div>
+        </div>
+      </div>`;
+  }).join('');
+
+  // Agences
+  document.getElementById('table-agences-dash').innerHTML = AGENCES.map(a => `
+    <tr>
+      <td><strong>${a.nom}</strong></td>
+      <td>${a.tel}</td>
+      <td style="color:var(--muted)">${a.email}</td>
+      <td style="color:var(--muted)">${a.adresse}</td>
+      <td><span class="badge badge-confirmee">${a.bus} bus</span></td>
+    </tr>`).join('');
+
+ document.getElementById('table-reservations').innerHTML = [
+  { client: 'Diallo Mamadou',    trajet: 'Nktt → Nouadhibou', place: 3,  statut: 'confirmee' },
+  { client: 'Kane Fatima',       trajet: 'Nktt → Rosso',      place: 7,  statut: 'confirmee' },
+  { client: 'Mint Ahmed Mariem', trajet: 'Nktt → Kaédi',      place: 1,  statut: 'bloquee'   },
+  { client: 'Ba Oumar',          trajet: 'Nktt → Zouerate',   place: 11, statut: 'confirmee' },
+  { client: 'Sow Aissatou',      trajet: 'Nktt → Atar',       place: 5,  statut: 'confirmee' },
+].map(r => `
+  <tr>
+    <td>${r.client}</td>
+    <td style="color:var(--muted)">${r.trajet}</td>
+    <td>Place ${r.place}</td>
+    <td><span class="badge badge-${r.statut}">${r.statut}</span></td>
+  </tr>`).join('');
+
+// ─── DISPONIBILITÉS ────────────────────────────
 async function chargerDisponibilites() {
   const idTrajet = document.getElementById('trajet-select').value;
-
   try {
     const res  = await fetch(`${API}/disponibilites/${idTrajet}`);
     const data = await res.json();
+    if (data.erreur) { afficherToast(data.erreur, 'error'); return; }
 
-    if (data.erreur) {
-      afficherToast(data.erreur, 'error');
-      return;
-    }
-
-    // Infos trajet
     const t = data.trajet;
     document.getElementById('info-date').textContent    = new Date(t.date_trajet).toLocaleDateString('fr-FR');
     document.getElementById('info-prix').textContent    = t.prix + ' MRU';
-    document.getElementById('info-periode').textContent = t.periode.charAt(0).toUpperCase() + t.periode.slice(1);
+    document.getElementById('info-periode').textContent = t.periode === 'matin' ? 'Matin' : 'Après-midi';
+    document.getElementById('input-montant').value      = t.prix;
 
-    // Stats
     const libres     = data.places.filter(p => p.statut_place === 'libre' || p.statut_place === 'expiree').length;
     const bloquees   = data.places.filter(p => p.statut_place === 'bloquee').length;
     const confirmees = data.places.filter(p => p.statut_place === 'confirmee').length;
 
-    document.getElementById('stat-libres').textContent    = libres;
-    document.getElementById('stat-bloquees').textContent  = bloquees;
-    document.getElementById('stat-confirmees').textContent = confirmees;
-    document.getElementById('stat-total').textContent     = data.total;
+    document.getElementById('ms-libres').textContent    = libres;
+    document.getElementById('ms-bloquees').textContent  = bloquees;
+    document.getElementById('ms-confirmees').textContent = confirmees;
+    document.getElementById('ms-total').textContent     = data.total;
 
-    // Grille
     afficherGrille(data.places);
-
-    // Prix par défaut dans modal
-    document.getElementById('input-montant').value = t.prix;
-
+    afficherTableTrajet(data.places);
   } catch(e) {
-    afficherToast('Impossible de joindre le serveur Flask. Vérifiez que python app.py est lancé.', 'error');
+    afficherToast('Serveur Flask non disponible', 'error');
   }
 }
 
-// ─── Afficher la grille de places ────────────────────────────────────────────
 function afficherGrille(places) {
   const grid = document.getElementById('seats-grid');
   grid.innerHTML = '';
-
   places.forEach((place, i) => {
-    // Ajouter un espace couloir après la 2ème colonne
-    if (i % 4 === 2) {
-      const aisle = document.createElement('div');
-      aisle.className = 'seat aisle';
-      grid.appendChild(aisle);
-    }
-
+    if (i % 4 === 2) { const a = document.createElement('div'); a.className = 'seat aisle'; grid.appendChild(a); }
     const seat = document.createElement('div');
     const statut = place.statut_place === 'expiree' ? 'libre' : place.statut_place;
     seat.className = `seat ${statut}`;
-    seat.dataset.id    = place.id_place;
-    seat.dataset.num   = place.numero_place;
-    seat.dataset.statut = statut;
-
-    let timerHtml = '';
+    let timer = '';
     if (statut === 'bloquee' && place.secondes_restantes) {
-      const min = Math.floor(place.secondes_restantes / 60);
-      const sec = place.secondes_restantes % 60;
-      timerHtml = `<div class="timer">⏱ ${min}:${sec.toString().padStart(2,'0')}</div>`;
+      const m = Math.floor(place.secondes_restantes / 60);
+      const s = place.secondes_restantes % 60;
+      timer = `<div class="timer">⏱${m}:${s.toString().padStart(2,'0')}</div>`;
     }
-
-    seat.innerHTML = `${place.numero_place}${timerHtml}`;
-
-    if (statut === 'libre') {
-      seat.onclick = () => ouvrirModal(place.id_place, place.numero_place);
-    }
-
+    seat.innerHTML = place.numero_place + timer;
+    if (statut === 'libre') seat.onclick = () => ouvrirModal(place.id_place, place.numero_place);
     grid.appendChild(seat);
   });
 }
 
-// ─── Modal ────────────────────────────────────────────────────────────────────
+function afficherTableTrajet(places) {
+  const tbody = document.getElementById('table-trajet-resa');
+  const reservees = places.filter(p => p.statut_place !== 'libre' && p.statut_place !== 'expiree');
+  if (reservees.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="4" style="color:var(--muted);text-align:center">Aucune réservation</td></tr>';
+    return;
+  }
+  tbody.innerHTML = reservees.map(p => {
+    const timer = p.statut_place === 'bloquee' && p.secondes_restantes
+      ? `${Math.floor(p.secondes_restantes/60)}m${p.secondes_restantes%60}s`
+      : '—';
+    return `<tr>
+      <td>Place ${p.numero_place}</td>
+      <td style="color:var(--muted)">Client #${p.id_client || '—'}</td>
+      <td><span class="badge badge-${p.statut_place}">${p.statut_place}</span></td>
+      <td style="color:var(--bloquee)">${timer}</td>
+    </tr>`;
+  }).join('');
+}
+
+// ─── TRAJETS ──────────────────────────────────
+async function chargerTrajets() {
+  const rows = [];
+  for (let i = 1; i <= 6; i++) {
+    try {
+      const r = await fetch(`${API}/disponibilites/${i}/resume`);
+      const d = await r.json();
+      const info = TRAJETS_INFO[i] || {};
+      const conf = parseInt(d.confirmees || 0);
+      const total = parseInt(d.total || 12);
+      const pct = total > 0 ? Math.round(conf / total * 100) : 0;
+      rows.push(`<tr>
+        <td style="color:var(--muted)">#${i}</td>
+        <td><strong>${info.depart}</strong></td>
+        <td><strong>${info.arrivee}</strong></td>
+        <td>${['10 Mai','10 Mai','10 Mai','11 Mai','11 Mai','12 Mai'][i-1]} 2026</td>
+        <td><span class="badge ${i%2===0?'badge-apresmidi':'badge-matin'}">${i%2===0?'Après-midi':'Matin'}</span></td>
+        <td><strong>${info.prix} MRU</strong></td>
+        <td>MR-00${i}</td>
+        <td>
+          <div style="display:flex;align-items:center;gap:0.5rem">
+            <div class="progress-bar" style="flex:1"><div class="progress-fill" style="width:${pct}%"></div></div>
+            <span style="font-size:0.72rem;color:var(--muted)">${pct}%</span>
+          </div>
+        </td>
+      </tr>`);
+    } catch(e) {}
+  }
+  document.getElementById('table-all-trajets').innerHTML = rows.join('') || '<tr><td colspan="8" style="color:var(--muted);text-align:center">Erreur de chargement</td></tr>';
+}
+
+// ─── CLIENTS ──────────────────────────────────
+function chargerClients() {
+  document.getElementById('table-clients').innerHTML = CLIENTS.map(c => `
+    <tr>
+      <td>
+        <div style="display:flex;align-items:center;gap:0.75rem">
+          <div class="avatar" style="background:rgba(99,102,241,0.2);color:#a5b4fc">${c.nom[0]}</div>
+          <strong>${c.nom}</strong>
+        </div>
+      </td>
+      <td>${c.tel}</td>
+      <td style="color:var(--muted)">${c.email}</td>
+      <td style="color:var(--muted);font-family:'Space Mono',monospace;font-size:0.75rem">${c.cin}</td>
+      <td><span class="badge badge-confirmee">${Math.floor(Math.random()*5)} résa</span></td>
+    </tr>`).join('');
+}
+
+// ─── AGENCES ──────────────────────────────────
+function chargerAgences() {
+  document.getElementById('table-agences').innerHTML = AGENCES.map(a => `
+    <tr>
+      <td>
+        <div style="display:flex;align-items:center;gap:0.75rem">
+          <div class="avatar" style="background:rgba(16,185,129,0.15);color:var(--libre)">🏢</div>
+          <strong>${a.nom}</strong>
+        </div>
+      </td>
+      <td>${a.tel}</td>
+      <td style="color:var(--muted)">${a.email}</td>
+      <td style="color:var(--muted)">${a.adresse}</td>
+      <td><span class="badge badge-confirmee">${a.bus} bus</span></td>
+      <td><span class="badge badge-libre">${a.bus * 2} trajets</span></td>
+    </tr>`).join('');
+}
+
+// ─── MODAL ────────────────────────────────────
 function ouvrirModal(idPlace, numPlace) {
   selectedPlace = idPlace;
   document.getElementById('modal-place-num').textContent = numPlace;
@@ -745,17 +969,11 @@ async function confirmerReservation() {
   const mode      = document.getElementById('input-mode').value;
   const idTrajet  = parseInt(document.getElementById('trajet-select').value);
 
-  if (!idClient || !montant || !mode) {
-    afficherToast('Remplissez tous les champs', 'error');
-    return;
-  }
-
-  const btn = document.querySelector('.btn-confirm');
+  const btn = document.getElementById('btn-confirm');
   btn.innerHTML = '<span class="spinner"></span>';
   btn.disabled = true;
 
   try {
-    // ÉTAPE 1 : Bloquer seulement
     const resBloc = await fetch(`${API}/reservations/bloquer`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -770,12 +988,10 @@ async function confirmerReservation() {
       return;
     }
 
-    // Fermer modal → place apparaît JAUNE (bloquée)
     afficherToast('⏳ Place bloquée ! Paiement en cours...', 'success');
     fermerModal();
     chargerDisponibilites();
 
-    // ÉTAPE 2 : Payer après 3 secondes
     setTimeout(async () => {
       const resPay = await fetch(`${API}/paiements/`, {
         method: 'POST',
@@ -787,13 +1003,12 @@ async function confirmerReservation() {
           mode_paiement: mode
         })
       });
-      const dataPay = await resPay.json();
-
       if (resPay.ok) {
         afficherToast('✅ Paiement confirmé ! Place réservée.', 'success');
         chargerDisponibilites();
+        chargerDashboard();
       }
-    }, 3000);
+    }, 4000);
 
   } catch(e) {
     afficherToast('Erreur de connexion au serveur', 'error');
@@ -803,7 +1018,7 @@ async function confirmerReservation() {
   btn.disabled = false;
 }
 
-// ─── Toast ────────────────────────────────────────────────────────────────────
+// ─── TOAST ────────────────────────────────────
 function afficherToast(msg, type) {
   const t = document.getElementById('toast');
   t.textContent = msg;
@@ -811,14 +1026,14 @@ function afficherToast(msg, type) {
   setTimeout(() => t.classList.remove('show'), 4000);
 }
 
-// ─── Init + polling toutes les 10s ────────────────────────────────────────────
-chargerDisponibilites();
-intervalId = setInterval(chargerDisponibilites, 10000);
-
-// Fermer modal en cliquant à l'extérieur
+// ─── MODAL OUTSIDE CLICK ─────────────────────
 document.getElementById('modal').addEventListener('click', function(e) {
   if (e.target === this) fermerModal();
 });
+
+// ─── INIT ─────────────────────────────────────
+chargerDashboard();
+setInterval(chargerDashboard, 10000);
 </script>
 </body>
 </html>

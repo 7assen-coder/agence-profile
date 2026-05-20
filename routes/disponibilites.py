@@ -68,5 +68,23 @@ def resume_trajet(id_trajet):
             WHERE p.id_bus = (SELECT id_bus FROM trajets WHERE id_trajet = %s)
         """, (id_trajet, id_trajet))
         resume = cur.fetchone()
+        return jsonify(resume)
 
-    return jsonify(resume)
+@bp_dispo.get("/reservations/recentes")
+def reservations_recentes():
+    with get_db() as (conn, cur):
+        cur.execute("""
+            SELECT r.statut, c.nom, c.prenom,
+                   p.numero_place,
+                   v1.nom AS ville_depart,
+                   v2.nom AS ville_arrivee
+            FROM reservations r
+            JOIN clients c ON c.id_client = r.id_client
+            JOIN places p ON p.id_place = r.id_place
+            JOIN trajets t ON t.id_trajet = r.id_trajet
+            JOIN villes v1 ON v1.id_ville = t.id_ville_depart
+            JOIN villes v2 ON v2.id_ville = t.id_ville_arrivee
+            WHERE r.statut != 'annulee'
+            ORDER BY r.date_reservation DESC LIMIT 10
+        """)
+        return jsonify({"reservations": cur.fetchall()})
